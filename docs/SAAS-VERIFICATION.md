@@ -1,3 +1,17 @@
+# Hosted verification — 18 November 2026
+
+The core is live at https://nexzekbizhub.vercel.app; manual: https://nexzekbizhub.vercel.app/manual. Vercel production compilation, TypeScript and route generation passed on Node 24. Actual HTTPS home/manual/login/start returned 200, worker/platform health denied unauthenticated access, and the three public mobile pages passed without overflow or page errors.
+
+Supabase installed 63 exact-checksum migration files (001–062 and additive 064). All public tables have RLS, foreign keys are validated and tracked legacy routine integrity is intact. A real PostgreSQL transaction verified company and warehouse boundaries and restored caller context; all its synthetic identities and business records rolled back. The private Auth bridge is inaccessible to browser roles and preserves the managed Auth table's ability to add columns.
+
+The authenticated live worker returned 200, processed zero charges and reported automatic billing paused. Its Supabase Cron/Vault/pg_net commissioning request returned 200 and recorded a heartbeat. Public plan publication, SMTP, Paystack acceptance, custom DNS/HTTPS, full hosted restore and representative concurrent hosted load remain open. The production dependency audit found zero advisories.
+
+The complete pre-adaptation regression passed 324 tests in 64 files. The final regression with hosted Auth permissions passed **327 tests in 65 files**. Lint passed. The five-minute Cron schedule completed an actual successful run, returned HTTP 200 and refreshed the worker heartbeat.
+
+## Historical offline evidence
+
+The following entries describe earlier source snapshots; their negative deployment statements are superseded by the hosted status above.
+
 # Offline SaaS verification — 17 November 2026
 
 ## Follow-up — deployment preparation
@@ -69,4 +83,4 @@ Hosted validation is prepared through `npm run test:load:hosted` with a separate
 
 **Production acceptance remains open:** hosted PostgreSQL/PostgREST role behavior, real Auth/Storage restoration, actual Paystack/subaccount and failure responses, SMTP, HTTPS/DNS, process restarts, scheduled execution, alert delivery and representative pooled/HTTP load. The wider master brief also has outstanding modules documented in [SAAS-IMPLEMENTATION.md](SAAS-IMPLEMENTATION.md); this report does not claim that the entire enterprise platform is complete.
 
-The retained workload source hash was checked again after final compilation and matches the current source. [Changed files](SAAS-CHANGES.md) lists the implementation paths.
+The retained workload source hash identifies the historical offline snapshot and does not identify the later hosting changes. [Changed files](SAAS-CHANGES.md) lists the implementation paths.

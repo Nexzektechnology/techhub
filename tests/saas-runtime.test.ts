@@ -32,6 +32,11 @@ it('prevents SaaS hosting with the earlier flagship Supabase project configurati
  const env={NEXT_PUBLIC_SITE_URL:'https://saas.example.com',NEXT_PUBLIC_SUPABASE_URL:'https://iipbmwpigedfslqybxmg.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'sb_publishable_fixture',LOCAL_DEMO:'false',SAAS_PLATFORM_SITE:'true'};expect(saasHostingProblems(env)).toEqual([]);expect(saasHostingProblems({...env,NEXT_PUBLIC_SUPABASE_URL:'https://itdpkfnuyxzqswctlsar.supabase.co'})).toContain('NEXT_PUBLIC_SUPABASE_URL must identify the designated project iipbmwpigedfslqybxmg.');
  const jwt='header.'+Buffer.from(JSON.stringify({ref:'another-project',role:'service_role'})).toString('base64url')+'.signature';expect(saasHostingProblems({...env,SUPABASE_SERVICE_ROLE_KEY:jwt},'runtime')).toContain('The service-role JWT belongs to another project or role.');
 });
+it('allows documented Vercel deployment metadata while rejecting public secrets',()=>{
+ const env={NEXT_PUBLIC_SITE_URL:'https://saas.example.com',NEXT_PUBLIC_SUPABASE_URL:'https://iipbmwpigedfslqybxmg.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'sb_publishable_fixture',LOCAL_DEMO:'false',SAAS_PLATFORM_SITE:'true',NEXT_PUBLIC_VERCEL_ENV:'production',NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL:'saas.example.com'};
+ expect(saasHostingProblems(env)).toEqual([]);
+ expect(saasHostingProblems({...env,NEXT_PUBLIC_VERCEL_SECRET:'private'}).join(' ')).toContain('NEXT_PUBLIC_VERCEL_SECRET');
+});
 it('binds migration/load profiles to exact Supabase direct or pooler project identities',()=>{
  const ref='iipbmwpigedfslqybxmg';expect(databaseMatchesProject(`postgres://postgres@db.${ref}.supabase.co/postgres`,ref)).toBe(true);expect(databaseMatchesProject(`postgres://postgres.${ref}@aws-0-eu.pooler.supabase.com:5432/postgres`,ref)).toBe(true);
  for(const connection of [`postgres://postgres@db.itdpkfnuyxzqswctlsar.supabase.co/postgres`,`postgres://postgres.${ref}@attacker.example/postgres`,`postgres://postgres@db.${ref}.supabase.co.attacker.example/postgres`])expect(databaseMatchesProject(connection,ref)).toBe(false);

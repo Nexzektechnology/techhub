@@ -1,10 +1,10 @@
 # SaaS testing, deployment and recovery
 
-The owner has now requested deployment. Offline checks have passed and application-key access to the designated Supabase project was verified read-only. Account authorization for database installation and Vercel deployment remains unavailable. Tests need no hosted credentials or migration evidence. No hosted mutation or new deployment has been performed. See [current checkpoint](BIZHUB-DEPLOYMENT-PENDING.md).
+The core release is hosted on Vercel and the designated Supabase project. Auth redirects, a separate platform owner and five-minute Supabase scheduling are configured. Payments, production SMTP, public plans, DNS, restore acceptance and hosted capacity still require commissioning. See [current deployment status](BIZHUB-DEPLOYMENT-PENDING.md).
 
 ## Deployment identity and build
 
-Repository: [Nexzektechnology/techhub](https://github.com/Nexzektechnology/techhub). Supabase: [iipbmwpigedfslqybxmg](https://supabase.com/dashboard/project/iipbmwpigedfslqybxmg). Public identifiers are in `config/saas-deployment.json`. The earlier flagship remote/private environment were preserved; `techhub` is a separate Git remote. No source was pushed.
+Repository: [Nexzektechnology/techhub](https://github.com/Nexzektechnology/techhub). Supabase: [iipbmwpigedfslqybxmg](https://supabase.com/dashboard/project/iipbmwpigedfslqybxmg). Public identifiers are in `config/saas-deployment.json`. The earlier flagship remote/private environment were preserved; `techhub` is a separate Git remote. The core source was pushed to main.
 
 Legacy `build:vercel`/`build:hostinger` prepare the previous flagship defaults. For this SaaS host use `npm run build:saas`, which does not call that legacy preparation script. Privately configure the actual HTTPS `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL=https://iipbmwpigedfslqybxmg.supabase.co`, its matching publishable/anon key, and `LOCAL_DEMO=false`. Matching server-only service/payment/encryption/scheduler credentials belong in host settings. Never mix keys from the previous project. `npm run check:saas:hosting` checks runtime configuration offline without contacting providers.
 

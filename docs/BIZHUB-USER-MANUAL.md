@@ -1,6 +1,10 @@
 # Nexzek BizHub user manual
 
-Prepared 17 November 2026. **The new Vercel deployment is not live yet.** The new Supabase application keys have been accepted by the designated project and saved privately. Account authorization, hosted database installation, DNS/HTTPS and service commissioning remain pending. Domain/cart handoff and mobile-manual checks have passed offline. This guide explains the operating workflow once hosting setup is complete.
+Updated 18 November 2026. Open [Nexzek BizHub](https://nexzekbizhub.vercel.app) or the [online manual](https://nexzekbizhub.vercel.app/manual). The app and Supabase database are hosted. Public registration needs a published plan and production email delivery; paid checkout needs Paystack commissioning. Custom domains and shared subdomains need their DNS/HTTPS setup.
+
+## First platform owner setup
+
+Finish the private account setup, choose your password, then open [Platform security](https://nexzekbizhub.vercel.app/platform/security) and enroll your authenticator. In **Platform billing**, review plans, publish approved prices and enable the plan you want businesses to select. Configure production email delivery before inviting outside users.
 
 ## Getting started
 
@@ -85,7 +89,7 @@ For wildcard HTTPS, Vercel needs DNS challenge access. You can move the domain t
 
 After DNS/HTTPS are valid, configure the central HTTPS app URL, matching Supabase Auth redirects, `SAAS_TENANT_ROOT_DOMAIN=nexzekbizhub.com` and domain routing. Keep staff authentication and checkout on the central app; do not share parent-domain session cookies across businesses.
 
-Use a verified platform administrator with MFA for company suspension, plans, prices, settlement accounts and domain activation. Configure the billing worker and monitor its heartbeat. Frequent cron schedules need a compatible Vercel plan or another approved scheduler; do not assume Hobby supports five-minute cron execution.
+Use a verified platform administrator with MFA for company suspension, plans, prices, settlement accounts and domain activation. The hosted worker is scheduled every five minutes through Supabase Cron, using Vault for its private credential. Monitor its heartbeat in platform health. Automatic payments remain paused until Paystack and billing are commissioned.
 
 ## Troubleshooting
 
@@ -106,4 +110,4 @@ New-tenant POS, advanced procurement/transfers, tenant refunds/reports, customer
 - [Vercel multi-tenant domain configuration](https://vercel.com/docs/platforms/multi-tenant-platforms/configuring-domains)
 - [Vercel cron scheduling limits](https://vercel.com/docs/cron-jobs/usage-and-pricing)
 
-Once deployed, the in-app guide is available at `/manual`, with a **Print or save as PDF** button.
+The in-app guide is available at [the online manual](https://nexzekbizhub.vercel.app/manual), with a **Print or save as PDF** button.

@@ -1,10 +1,10 @@
 # SaaS implementation — 16–17 November 2026
 
-The commercial foundation, independent storefronts, commerce isolation, scoped branch/warehouse permissions and consent-based automatic subscription billing are implemented locally. Migrations 049–061 are prepared and have not been applied to a hosted database. The owner requested offline testing now, with hosted validation available when hosting is ready. Offline evidence is not a production capacity, provider or disaster-recovery certificate.
+The core commercial foundation, independent storefronts, commerce isolation, scoped branch/warehouse permissions and consent-based automatic billing are implemented. The core is hosted at https://nexzekbizhub.vercel.app against Supabase iipbmwpigedfslqybxmg. See BIZHUB-DEPLOYMENT-PENDING.md for current hosted checks and remaining service commissioning.
 
 ## Deployment identity
 
-The owner identified [Nexzektechnology/techhub](https://github.com/Nexzektechnology/techhub) and [Supabase project iipbmwpigedfslqybxmg](https://supabase.com/dashboard/project/iipbmwpigedfslqybxmg). These public identifiers are in `config/saas-deployment.json`. Earlier repository and private environment settings were preserved; a separate `techhub` Git remote was added. No source was pushed and no hosted configuration changed.
+The owner identified [Nexzektechnology/techhub](https://github.com/Nexzektechnology/techhub) and [Supabase project iipbmwpigedfslqybxmg](https://supabase.com/dashboard/project/iipbmwpigedfslqybxmg). These public identifiers are in `config/saas-deployment.json`. Earlier repository and private environment settings were preserved; a separate `techhub` Git remote was added. The core source was pushed; the designated project was initialized and configured.
 
 Use `build:saas`, `check:saas:hosting` and `db:saas:*` for this deployment. They check the designated project instead of using the earlier Hostinger public defaults. Configure matching credentials privately. A dashboard URL provides no database credentials or proof of migration parity.
 
@@ -38,7 +38,7 @@ The offline inventory reconstructs the resulting catalog. The migrator checks ap
 
 See `SAAS-VERIFICATION.md` for measured results. Offline browser acceptance runs the real Next application and PostgreSQL RLS with loopback Auth/REST/payment simulators. The workload exercises 100 companies and 1,000 synthetic users. PGlite queues concurrent work through one session; these timings cannot establish hosted capacity. CI is prepared in `.github/workflows/tenant-offline.yml` without service secrets. The optional hosted workload uses separate staging credentials and pooled TLS connections.
 
-Hosted role/PostgREST behavior, real Auth/Storage restoration, SMTP, actual payment/subaccount responses, HTTPS/DNS, host restarts, scheduler execution and concurrent capacity still need commissioning. No hosted backup, migration, charge, deployment or DNS change was performed.
+Hosted role/PostgREST behavior, real Auth/Storage restoration, SMTP, actual payment/subaccount responses, HTTPS/DNS, host restarts, scheduler execution and concurrent capacity still need commissioning. Database installation and application deployment passed. No real payment, domain change or hosted restore acceptance has been performed.
 
 The full master brief extends beyond this core commerce release. New-tenant POS, procurement/transfers, refunds, customer account history/CRM/reviews, advanced delivery/reports, PDF/email document templates, email notification delivery, support sessions, add-ons, tenant export/deletion and automated orphan cleanup are not implemented by the new tenant endpoints. Existing flagship features remain available where they already existed. Delivery stays disabled for new tenants. Employee/storage limits exist; configurable branch/product/order quotas and request/egress metering are not included. Domain roots enter the central company workspace; custom-domain storefront sessions are not claimed.
 

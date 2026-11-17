@@ -11,7 +11,7 @@ create function public.tenant_order_json(p_company uuid,p_order uuid) returns js
 $$;
 -- Every entrypoint has a function-local tenant setting, restored by PostgreSQL
 -- on success and failure. Browser-supplied IDs are selectors, never authority.
-create function public.tenant_commerce_command(p_company uuid,p_action text,p_data jsonb) returns jsonb language plpgsql security definer set search_path=public set app.tenant_id='' as $$
+create function public.tenant_commerce_command(p_company uuid,p_action text,p_data jsonb) returns jsonb language plpgsql security definer set search_path=public as $$
 declare entity_id text;uid uuid;rid uuid;bid uuid;wid text;pid text;delta integer;p products;v jsonb;permissions text[];scope text;result jsonb;begin
  if not tenant_verified_user() or company_role(p_company) is null then raise exception 'Forbidden';end if;
  if jsonb_typeof(p_data) is distinct from 'object' or octet_length(p_data::text)>30000 then raise exception 'Invalid command';end if;
@@ -79,7 +79,7 @@ declare entity_id text;uid uuid;rid uuid;bid uuid;wid text;pid text;delta intege
  perform platform_log(p_company,'tenant.'||p_action,jsonb_build_object('result',result));return result;
 end $$;
 
-create function public.tenant_commerce_snapshot(p_company uuid,p_page integer default 1) returns jsonb language plpgsql stable security definer set search_path=public set app.tenant_id='' as $$ begin
+create function public.tenant_commerce_snapshot(p_company uuid,p_page integer default 1) returns jsonb language plpgsql stable security definer set search_path=public as $$ begin
  if not tenant_verified_user() or company_role(p_company) is null or not tenant_commerce_enabled(p_company) or p_page is null or p_page not between 1 and 100000 then raise exception 'Forbidden';end if;
  perform set_config('app.tenant_id',p_company::text,true);
  return jsonb_build_object('company_id',p_company,'access',saas_access(p_company),'permissions',(select coalesce(jsonb_agg(p),'[]') from unnest(array['catalogue.read','catalogue.edit','inventory.read','inventory.adjust','orders.read','orders.manage','finance.read','finance.manage','procurement.manage','reports.read','locations.manage','team.manage','storefront.manage']) p where tenant_any_permission(p_company,p)),
@@ -101,3 +101,7 @@ alter function tenant_commerce_snapshot(uuid,integer) owner to edge_tenant_execu
 revoke all on function tenant_assert(uuid,text,uuid,text),tenant_stock_sync(uuid,text),tenant_order_json(uuid,uuid),tenant_commerce_command(uuid,text,jsonb),tenant_commerce_snapshot(uuid,integer) from public,anon,authenticated;
 grant execute on function tenant_commerce_command(uuid,text,jsonb),tenant_commerce_snapshot(uuid,integer) to authenticated;
 grant execute on all functions in schema public to edge_legacy_executor,edge_tenant_executor;
+
+-- Preserve public RPC grants while keeping raw implementations private.
+select tenant_install_context_wrapper('public.tenant_commerce_command(uuid,text,jsonb)'::regprocedure);
+select tenant_install_context_wrapper('public.tenant_commerce_snapshot(uuid,integer)'::regprocedure);

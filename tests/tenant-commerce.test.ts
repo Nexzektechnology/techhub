@@ -19,6 +19,18 @@ beforeAll(async()=>{
  await identity(db,actors.a,()=>db.query("select company_set_member($1,'staff@tenant.example','supervisor',true)",[a]));
 });
 afterAll(async()=>db?.close());
+it('restores caller context after successful and rejected tenant RPCs without exposing private implementations',async()=>{
+ await identity(db,actors.a,async()=>{
+  await db.query("select set_config('app.tenant_id',$1,false)",[b]);
+  try{
+   const snapshot=await value<{company_id:string;products:{company_id:string}[]}>(db,'select tenant_commerce_snapshot($1) v',[a]);expect(snapshot.company_id).toBe(a);expect(snapshot.products.every(p=>p.company_id===a)).toBe(true);
+   expect(await value(db,"select current_setting('app.tenant_id',true) v")).toBe(b);
+   await expect(db.query('select tenant_commerce_snapshot($1)',[b])).rejects.toThrow('Forbidden');expect(await value(db,"select current_setting('app.tenant_id',true) v")).toBe(b);
+   expect((await db.query('select id from products where company_id=$1',[b])).rows).toEqual([]);
+   await expect(db.query('select edge_tenant_runtime.tenant_commerce_snapshot($1,1)',[a])).rejects.toThrow('permission denied');
+  }finally{await db.query("select set_config('app.tenant_id','',false)");}
+ });
+});
 it('assigns immutable tenant labels and resolves only active, published storefronts without exposing domain administration',async()=>{
  expect(await identity(db,'',()=>value(db,"select saas_resolve_subdomain('tenant-a') v"),'anon')).toBe('tenant-a');
  expect(await identity(db,'',()=>value(db,"select saas_resolve_subdomain('tenant-b') v"),'anon')).toBeNull();

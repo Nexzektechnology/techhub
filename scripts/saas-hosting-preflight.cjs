@@ -12,7 +12,12 @@ function configurationProblems(env,mode='build'){
  try{const u=new URL(env.NEXT_PUBLIC_SITE_URL);if(u.protocol!=='https:'||u.username||u.password||u.pathname!=='/'||u.search||u.hash||u.hostname==='localhost'||require('node:net').isIP(u.hostname))throw Error();}catch{errors.push('NEXT_PUBLIC_SITE_URL must be the public HTTPS application origin.');}
  if(env.LOCAL_DEMO!=='false')errors.push('LOCAL_DEMO must be false on the host.');
  if(env.SAAS_PLATFORM_SITE!=='true')errors.push('SAAS_PLATFORM_SITE must be true for the BizHub deployment.');
- if(Object.keys(env).some(k=>k.startsWith('NEXT_PUBLIC_')&&!['NEXT_PUBLIC_SITE_URL','NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_ANON_KEY'].includes(k)))errors.push('Review unexpected browser-exposed environment settings.');
+ // Vercel's Next preset injects documented public deployment metadata even
+ // when automatic system-variable exposure is disabled. Do not allow arbitrary
+ // NEXT_PUBLIC_VERCEL_* names: a misspelled secret must still fail closed.
+ const publicNames=['NEXT_PUBLIC_SITE_URL','NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_ANON_KEY',...['ENV','TARGET_ENV','URL','BRANCH_URL','PROJECT_PRODUCTION_URL','DEPLOYMENT_ID','PROJECT_ID','GIT_PROVIDER','GIT_REPO_SLUG','GIT_REPO_OWNER','GIT_REPO_ID','GIT_COMMIT_REF','GIT_COMMIT_SHA','GIT_COMMIT_MESSAGE','GIT_COMMIT_AUTHOR_LOGIN','GIT_COMMIT_AUTHOR_NAME','GIT_PREVIOUS_SHA','GIT_PULL_REQUEST_ID','OBSERVABILITY_CLIENT_CONFIG'].map(name=>'NEXT_PUBLIC_VERCEL_'+name)];
+ const unexpected=Object.keys(env).filter(k=>k.startsWith('NEXT_PUBLIC_')&&!publicNames.includes(k));
+ if(unexpected.length)errors.push('Review unexpected browser-exposed environment settings: '+unexpected.join(', ')+'.');
  if(mode==='runtime'){
   if(env.SAAS_SETUP_MODE==='true')errors.push('A setup preview is not an operational runtime deployment.');
   if(!env.SUPABASE_SERVICE_ROLE_KEY)errors.push('Configure the matching project server-only service key.');

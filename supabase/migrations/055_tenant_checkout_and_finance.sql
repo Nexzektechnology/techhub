@@ -44,7 +44,7 @@ create function public.tenant_expire_orders(p_company uuid) returns integer lang
   update orders set status='expired' where company_id=p_company and id=o.id;n=n+1;
  end loop;return n;
 end $$;
-create function public.tenant_storefront(p_slug text,p_query text default '',p_page integer default 1,p_product text default null) returns jsonb language plpgsql stable security definer set search_path=public set app.tenant_id='' as $$
+create function public.tenant_storefront(p_slug text,p_query text default '',p_page integer default 1,p_product text default null) returns jsonb language plpgsql stable security definer set search_path=public as $$
 declare cid uuid;s tenant_storefronts;c platform_companies;begin
  select x.id,x.slug,x.name,x.brand into c.id,c.slug,c.name,c.brand from tenant_public_company(p_slug) x;
  if not found or not tenant_commerce_enabled(c.id) then raise exception 'Store unavailable';end if;cid=c.id;
@@ -56,7 +56,7 @@ declare cid uuid;s tenant_storefronts;c platform_companies;begin
  'count',(select count(*) from products where company_id=cid and active and archived_at is null and(p_query='' or position(lower(p_query) in lower(name||' '||brand))>0) and(p_product is null or tenant_slug=p_product)),
  'products',coalesce((select jsonb_agg(jsonb_build_object('id',p.id,'slug',p.tenant_slug,'name',p.name,'category_id',p.category_id,'brand',coalesce(nullif(p.brand,''),p.merchant_name),'merchant_id',p.merchant_id,'merchant_name',c.name,'price_kobo',p.price_kobo,'previous_price_kobo',p.previous_price_kobo,'stock',coalesce(i.on_hand,0),'reserved',coalesce(i.reserved,0),'image',p.image,'images',p.images,'description',coalesce(nullif(p.description,''),p.name),'options',p.options,'active',p.active,'featured',p.featured,'created_at',p.created_at)) from(select * from products where company_id=cid and active and archived_at is null and(p_query='' or position(lower(p_query) in lower(name||' '||brand))>0) and(p_product is null or tenant_slug=p_product) order by created_at desc,id limit 12 offset(p_page-1)*12)p left join tenant_inventory i on i.company_id=cid and i.product_id=p.id and i.warehouse_id=s.warehouse_id),'[]'));
 end $$;
-create function public.tenant_checkout(p_slug text,p_input jsonb) returns jsonb language plpgsql security definer set search_path=public set app.tenant_id='' as $$
+create function public.tenant_checkout(p_slug text,p_input jsonb) returns jsonb language plpgsql security definer set search_path=public as $$
 declare c platform_companies;s tenant_storefronts;w warehouses;k uuid:=(p_input->>'key')::uuid;fp text:=md5(p_input::text);prior idempotency_records;oid uuid:=gen_random_uuid();ref text:='edge-tenant-'||gen_random_uuid()::text;p products;line jsonb;pair record;opt record;qty integer;available integer;subtotal bigint:=0;begin
  if not tenant_verified_user() then raise exception 'Authentication required';end if;
  select x.id,x.slug,x.name,x.brand into c.id,c.slug,c.name,c.brand from tenant_public_company(p_slug) x;
@@ -96,12 +96,12 @@ declare c platform_companies;s tenant_storefronts;w warehouses;k uuid:=(p_input-
  insert into idempotency_records(company_id,key,owner_id,fingerprint,order_id) values(c.id,k,auth.uid(),fp,oid);
  perform platform_log(c.id,'tenant.order.created',jsonb_build_object('order',oid));return tenant_order_json(c.id,oid);
 end $$;
-create function public.tenant_my_order(p_slug text,p_reference text) returns jsonb language plpgsql stable security definer set search_path=public set app.tenant_id='' as $$ declare cid uuid;o orders;begin
+create function public.tenant_my_order(p_slug text,p_reference text) returns jsonb language plpgsql stable security definer set search_path=public as $$ declare cid uuid;o orders;begin
  select id into cid from tenant_public_company(p_slug);if not found or not tenant_verified_user() then raise exception 'Authentication required';end if;
  perform set_config('app.tenant_id',cid::text,true);select * into o from orders where company_id=cid and reference=p_reference;
  if not found or(o.customer_id<>auth.uid() and not tenant_permission(cid,'orders.read',null,o.warehouse_id)) then raise exception 'Forbidden';end if;return tenant_order_json(cid,o.id);
 end $$;
-create function public.tenant_apply_payment(p_reference text,p_amount bigint,p_currency text,p_status text,p_provider text) returns jsonb language plpgsql security definer set search_path=public set app.tenant_id='' as $$ declare cid uuid;o orders;r stock_reservations;existing payments;begin
+create function public.tenant_apply_payment(p_reference text,p_amount bigint,p_currency text,p_status text,p_provider text) returns jsonb language plpgsql security definer set search_path=public as $$ declare cid uuid;o orders;r stock_reservations;existing payments;begin
  cid=tenant_payment_company(p_reference);if cid is null then raise exception 'Unknown tenant payment';end if;perform set_config('app.tenant_id',cid::text,true);
  select * into o from orders where company_id=cid and reference=p_reference for update;
  if p_amount is distinct from o.total_kobo or p_currency is distinct from 'NGN' or p_status is distinct from 'success' or coalesce(p_provider,'')!~'^[0-9]{1,30}$' then raise exception 'Payment verification mismatch';end if;
@@ -122,7 +122,7 @@ create function public.tenant_apply_payment(p_reference text,p_amount bigint,p_c
  insert into merchant_ledger(company_id,order_id,merchant_id,gross_kobo,discount_kobo,commission_kobo,net_kobo) select cid,o.id,merchant_id,total_kobo,0,0,total_kobo from order_allocations where company_id=cid and order_id=o.id;
  perform platform_log(cid,'tenant.payment.verified',jsonb_build_object('reference',p_reference));return tenant_order_json(cid,o.id);
 end $$;
-create function public.tenant_expire_company(p_company uuid) returns integer language plpgsql security definer set search_path=public set app.tenant_id='' as $$ begin perform set_config('app.tenant_id',p_company::text,true);return tenant_expire_orders(p_company);end $$;
+create function public.tenant_expire_company(p_company uuid) returns integer language plpgsql security definer set search_path=public as $$ begin perform set_config('app.tenant_id',p_company::text,true);return tenant_expire_orders(p_company);end $$;
 create function public.tenant_expire_pending() returns integer language plpgsql security definer set search_path=public as $$ declare cid uuid;n integer:=0;begin
  for cid in select distinct company_id from orders where company_id<>'10000000-0000-4000-8000-000000000001' and status='awaiting_payment' and expires_at<=now() limit 100 loop n=n+tenant_expire_company(cid);end loop;return n;
 end $$;
@@ -139,3 +139,10 @@ grant execute on all functions in schema public to edge_legacy_executor,edge_ten
 do $$ declare r record;begin for r in select conname from pg_constraint where conrelid='platform_modules'::regclass and contype='c' and pg_get_constraintdef(oid) like '%enabled%' loop execute format('alter table platform_modules drop constraint %I',r.conname);end loop;end $$;
 alter table platform_modules add constraint provisioned_module_only check(not enabled or module in ('branding','field_operations','commerce'));
 update saas_module_registry set ready=true,description='Company-scoped catalogue, warehouse inventory and verified order payments' where id='commerce';
+
+-- Preserve public RPC grants while keeping raw implementations private.
+select tenant_install_context_wrapper('public.tenant_storefront(text,text,integer,text)'::regprocedure);
+select tenant_install_context_wrapper('public.tenant_checkout(text,jsonb)'::regprocedure);
+select tenant_install_context_wrapper('public.tenant_my_order(text,text)'::regprocedure);
+select tenant_install_context_wrapper('public.tenant_apply_payment(text,bigint,text,text,text)'::regprocedure);
+select tenant_install_context_wrapper('public.tenant_expire_company(uuid)'::regprocedure);

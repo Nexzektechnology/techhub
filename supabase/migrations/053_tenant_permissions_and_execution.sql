@@ -12,6 +12,52 @@ grant execute on function auth.uid() to edge_legacy_executor,edge_tenant_executo
 -- This private role is never granted to a browser or PostgREST session role.
 grant select on auth.users to edge_legacy_executor;
 
+-- Hosted PostgreSQL owners are not superusers and cannot put an undeclared
+-- custom parameter in a function SET clause. Keep implementations inaccessible
+-- and install public wrappers with explicit restoration on every exit path.
+create schema edge_tenant_runtime;
+revoke all on schema edge_tenant_runtime from public,anon,authenticated,service_role;
+grant usage on schema edge_tenant_runtime to edge_tenant_executor;
+create function public.tenant_install_context_wrapper(p_function regprocedure) returns void language plpgsql security invoker set search_path=public,pg_temp as $installer$
+declare f pg_proc;definition text;implementation text;signature text;arguments text;body text;result_type text;invoke_sql text;return_sql text;result_declaration text;
+begin
+ if current_user<>'postgres' then raise exception 'Migration owner required';end if;
+ select * into f from pg_proc where oid=p_function;
+ if f.pronamespace<>'public'::regnamespace or not f.prosecdef or pg_get_userbyid(f.proowner)<>'edge_tenant_executor' or f.proretset or f.proargmodes is not null or f.prorettype not in ('jsonb'::regtype,'integer'::regtype,'void'::regtype) then raise exception 'Unsupported tenant context entrypoint';end if;
+ if f.prosrc like '%edge_prior_tenant_setting%' then return;end if;
+ definition:=pg_get_functiondef(f.oid);
+ if length(f.prosrc)=0 or (length(definition)-length(replace(definition,f.prosrc,'')))/length(f.prosrc)<>1 then raise exception 'Unexpected tenant entrypoint definition';end if;
+ implementation:=regexp_replace(definition,'^CREATE OR REPLACE FUNCTION public[.]','CREATE OR REPLACE FUNCTION edge_tenant_runtime.');
+ if implementation=definition then raise exception 'Unexpected tenant function namespace';end if;
+ execute implementation;
+ signature:=format('edge_tenant_runtime.%I(%s)',f.proname,oidvectortypes(f.proargtypes));
+ grant create on schema edge_tenant_runtime to edge_tenant_executor;
+ execute format('alter function %s owner to edge_tenant_executor',signature);
+ revoke create on schema edge_tenant_runtime from edge_tenant_executor;
+ execute format('alter function %s set search_path=public,pg_temp',signature);
+ execute format('revoke all on function %s from public,anon,authenticated,service_role',signature);
+ execute format('grant execute on function %s to edge_tenant_executor',signature);
+ select coalesce(string_agg('$'||position,',' order by position),'') into arguments from generate_series(1,f.pronargs) as parameters(position);
+ result_type:=pg_get_function_result(f.oid);
+ if result_type='void' then result_declaration:='';invoke_sql:=format('perform edge_tenant_runtime.%I(%s);',f.proname,arguments);return_sql:='return;';
+ else result_declaration:=format('edge_return_value %s;',result_type);invoke_sql:=format('edge_return_value:=edge_tenant_runtime.%I(%s);',f.proname,arguments);return_sql:='return edge_return_value;';end if;
+ body:=format($wrapper$
+declare edge_prior_tenant_setting text:=current_setting('app.tenant_id',true);%s
+begin
+ perform set_config('app.tenant_id','',true);
+ %s
+ perform set_config('app.tenant_id',coalesce(edge_prior_tenant_setting,''),true);
+ %s
+exception when others then
+ perform set_config('app.tenant_id',coalesce(edge_prior_tenant_setting,''),true);
+ raise;
+end
+$wrapper$,result_declaration,invoke_sql,return_sql);
+ execute replace(definition,f.prosrc,body);
+end $installer$;
+revoke all on function tenant_install_context_wrapper(regprocedure) from public,anon,authenticated,service_role;
+grant execute on function tenant_install_context_wrapper(regprocedure) to postgres;
+
 create table public.tenant_branches(company_id uuid not null references platform_companies(id),id uuid not null default gen_random_uuid(),name text not null check(length(trim(name)) between 2 and 100),address text not null default '' check(length(address)<=500),active boolean not null default true,primary key(company_id,id));
 alter table warehouses add column branch_id uuid;
 alter table warehouses add constraint tenant_warehouse_branch foreign key(company_id,branch_id) references tenant_branches(company_id,id);
