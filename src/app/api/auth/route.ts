@@ -5,6 +5,7 @@ import { guard, failure } from '@/lib/http';
 export async function POST(req: Request) {
   try {
     guard(req);
+    if(process.env.SAAS_SETUP_MODE==='true')throw new Error('Account access is not open in this preview yet. Please return when setup is complete.');
     if (!configured()) throw new Error('Connect Supabase to enable customer accounts. Local workspace mode is available for administration.');
     const body = await req.text();
     if (body.length > 15000) throw new Error('Request too large');
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
     const result = input.action === 'register'
-      ? await db.auth.signUp({ email: input.email, password: input.password, options: { emailRedirectTo: `${origin}/auth/confirm${input.next === '/checkout' ? '?next=/checkout' : ''}` } })
+      ? await db.auth.signUp({ email: input.email, password: input.password, options: { emailRedirectTo: `${origin}/auth/confirm${input.next ? `?next=${input.next}` : ''}` } })
       : await db.auth.signInWithPassword({ email: input.email, password: input.password });
     if (result.error) throw new Error(input.action === 'login' ? 'Unable to sign in. Check your email and password, or confirm your email first.' : result.error.message);
     if(result.data.session){

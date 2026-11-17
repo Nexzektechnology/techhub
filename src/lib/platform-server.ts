@@ -7,7 +7,7 @@ export async function platformOverview(){const {db}=await platformIdentity();con
 export async function companySnapshot(slug:string):Promise<CompanySnapshot>{
   const {db,user}=await platformIdentity();const {data:company,error}=await db.rpc('company_context',{p_slug:slug});if(error||!company)throw new Error('Company unavailable or access denied');
   const {data:role}=await db.rpc('company_role',{p_company:company.id});if(!role)throw new Error('Company membership required');
-  const id=company.id;if(role==='field_agent'){const prepared=await db.rpc('field_prepare_day',{p_company:id});if(prepared.error)throw new Error('Your route could not be prepared');}const results=await Promise.all([
+  const id=company.id;if(role==='field_agent'&&company.billing_access!=='read_only'){const prepared=await db.rpc('field_prepare_day',{p_company:id});if(prepared.error)throw new Error('Your route could not be prepared');}const results=await Promise.all([
     db.from('platform_memberships').select('*').eq('company_id',id),db.from('field_stores').select('*').eq('company_id',id).order('name').limit(40),
     db.rpc('field_schedule',{p_company:id}),
     db.from('field_visits').select('id,assignment_id,agent_id,started_at,completed_at,override_reason,task_report').eq('company_id',id).order('started_at',{ascending:false}).limit(200),

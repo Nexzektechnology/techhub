@@ -1,0 +1,34 @@
+{
+  "run_id": "7794b61a-c66d-4a3a-bd0d-c1dd371e3821",
+  "executed_at": "2026-11-16T23:07:08.330Z",
+  "mode": "offline-postgresql-fixture",
+  "engine": "PGlite single PostgreSQL session; concurrent requests queued by client",
+  "source_sha256": "a71387eae23265e4ef9a941fcd9462b314b3cf804332de082852cbc71131bc5f",
+  "companies": 100,
+  "users": 1000,
+  "active_companies": 100,
+  "active_authenticated_users": 1000,
+  "products": 300,
+  "concurrency": 20,
+  "requests": 2000,
+  "operations": {
+    "catalogue": 1000,
+    "inventory": 400,
+    "stock": 200,
+    "checkout": 200,
+    "isolation": 200
+  },
+  "setup_ms": 31052,
+  "elapsed_ms": 114432,
+  "latency_ms": {
+    "p50": 969.05,
+    "p95": 2375.23,
+    "p99": 2595.59
+  },
+  "failures": [],
+  "failure_count": 0,
+  "isolation_failures": 0,
+  "passed": true,
+  "production_capacity_certified": false,
+  "limitations": "Offline correctness and contention regression only. This is not a production multi-connection or hosted payment capacity result."
+}

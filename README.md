@@ -1,4 +1,14 @@
-# E-Edge Direct 2U
+# Nexzek BizHub
+
+Company commerce, scoped inventory permissions, branded stores and subscription billing, built on the existing E-Edge Direct 2U application.
+
+**Deployment checkpoint — 17 November 2026:** The designated Supabase project's application keys were verified read-only and saved privately. Database installation, Vercel account access and GitHub push authentication remain pending; the new site is not online. See [deployment checkpoint](docs/BIZHUB-DEPLOYMENT-PENDING.md) and [user manual](docs/BIZHUB-USER-MANUAL.md).
+
+The repository's Vercel build uses `npm run build:saas`. Configure `SAAS_PLATFORM_SITE=true`, `LOCAL_DEMO=false`, the actual HTTPS `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL=https://iipbmwpigedfslqybxmg.supabase.co`, and the matching publishable key privately on the new project. Keep the service key server-only. Other payment, encryption, Auth, scheduling and DNS settings are described in [operations](docs/SAAS-OPERATIONS.md). The old local `.vercel` link is not the new deployment target; `npm run prepare:saas:release` creates an isolated source upload.
+
+## Existing flagship documentation
+
+**SaaS transformation (16 November):** Company commerce isolation, branch/warehouse permissions, independent storefronts and automatic billing are implemented locally. See [implementation status](docs/SAAS-IMPLEMENTATION.md), [verification](docs/SAAS-VERIFICATION.md), [catalog inventory](docs/SAAS-INVENTORY.md) and [testing/deployment runbook](docs/SAAS-OPERATIONS.md). The owner selected `Nexzektechnology/techhub` and Supabase `iipbmwpigedfslqybxmg`; use `build:saas` and `db:saas:*` for that target. Testing is offline until hosting is ready; hosted acceptance and deployment have not been performed.
 
 A responsive ecommerce marketplace built with Next.js 16, React 19, TypeScript, Supabase PostgreSQL/Auth/Storage and Paystack. The storefront, administration, Theme Studio, inventory reservations, merchant allocations and delivery workflow share one application.
 

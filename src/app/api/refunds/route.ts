@@ -12,8 +12,8 @@ export async function POST(req:Request){try{
   if(input.action==='process'){
     const {data,error}=await db.rpc('claim_refund',{p_id:input.id});if(error)throw new Error(error.message);row=data;
   }else{
-    const lookup=await db.from('refunds').select('*').eq('id',input.id).single();const record=lookup.data;if(lookup.error||!record||record.status==='requested')throw new Error('Refund not yet submitted');
-    const {data,error}=await db.from('orders').select('reference').eq('id',record.order_id).single();if(error)throw new Error(error.message);
+    const lookup=await db.from('refunds').select('*').eq('company_id','10000000-0000-4000-8000-000000000001').eq('id',input.id).single();const record=lookup.data;if(lookup.error||!record||record.status==='requested')throw new Error('Refund not yet submitted');
+    const {data,error}=await db.from('orders').select('reference').eq('company_id','10000000-0000-4000-8000-000000000001').eq('id',record.order_id).single();if(error)throw new Error(error.message);
     row={amount_kobo:Number(record.amount_kobo),reference:data.reference,provider_reference:String(record.provider_reference||input.provider||'')};
     if(!/^[0-9]+$/.test(row.provider_reference!))throw new Error('Enter the provider refund ID from Paystack to reconcile the ambiguous request');
   }

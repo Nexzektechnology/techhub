@@ -5,10 +5,10 @@ import Image from 'next/image';
 import { Search, Heart, ShoppingBag, UserRound, ArrowUpRight, Menu, X, ArrowRight, MapPin, Package, Sparkles } from 'lucide-react';
 import type { Theme } from '@/lib/theme';
 import { useShop } from './shop-state';
-export function Logo({theme}:{theme:Theme}) {
+export function Logo({theme,homeHref='/'}:{theme:Theme;homeHref?:string}) {
   const logo=theme.lightLogo||theme.logo;
   const official=!!logo&&logo.includes('e-edge-direct-2u-mark-20261021');
-  return <Link href="/" className={`logo${official?' official-logo':''}`} aria-label={`${theme.name} home`}>{logo?<><picture>{theme.mobileLogo&&<source media="(max-width:768px)" srcSet={theme.mobileLogo}/>}<Image src={logo} width={official?169:225} height={official?152:50} alt={theme.name} unoptimized/></picture>{official&&<span className="official-wordmark" aria-hidden="true">E-Edge<span>Direct 2U</span></span>}</>:<><span className="brand-symbol"><ArrowUpRight strokeWidth={3} size={23}/></span><span>{theme.name}<span className="logo-dot">.</span></span></>}</Link>;
+  return <Link href={homeHref} className={`logo${official?' official-logo':''}`} aria-label={`${theme.name} home`}>{logo?<><picture>{theme.mobileLogo&&<source media="(max-width:768px)" srcSet={theme.mobileLogo}/>}<Image src={logo} width={official?169:225} height={official?152:50} alt={theme.name} unoptimized/></picture>{official&&<span className="official-wordmark" aria-hidden="true">E-Edge<span>Direct 2U</span></span>}</>:<><span className="brand-symbol"><ArrowUpRight strokeWidth={3} size={23}/></span><span>{theme.name}<span className="logo-dot">.</span></span></>}</Link>;
 }
 export function StoreHeader({theme,preview=false}:{theme:Theme;preview?:boolean}) {
   const {state}=useShop();const [mobile,setMobile]=useState(false);const [search,setSearch]=useState('');const [suggestions,setSuggestions]=useState<{name:string;slug:string}[]>([]);const requestId=useRef(0);

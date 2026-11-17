@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, it, expect, vi } from 'vitest';
 const auth = vi.hoisted(() => ({
   resetPasswordForEmail:vi.fn(), getUser:vi.fn(), setSession:vi.fn(),
-  exchangeCodeForSession:vi.fn(), verifyOtp:vi.fn(), updateUser:vi.fn(),signOut:vi.fn(),
+  exchangeCodeForSession:vi.fn(), verifyOtp:vi.fn(), updateUser:vi.fn(),signOut:vi.fn(),signUp:vi.fn(),
 }));
 vi.mock('../src/lib/server', () => ({ configured:()=>true, supabase:async()=>({auth}) }));
 import { POST } from '../src/app/api/auth/route';
@@ -10,6 +10,12 @@ beforeEach(()=>vi.resetAllMocks());
 afterEach(()=>vi.unstubAllEnvs());
 const origin='https://edgedirect2u.vercel.app';
 const request=(body:unknown)=>new Request(`${origin}/api/auth`,{method:'POST',headers:{origin,'Content-Type':'application/json'},body:JSON.stringify(body)});
+it('keeps company registration through verified-email signup on the same trusted origin',async()=>{
+ auth.signUp.mockResolvedValue({data:{session:null,user:{}},error:null});
+ const r=await POST(request({action:'register',email:'owner@example.com',password:'company-test-password',next:'/start'}));expect(r.status).toBe(200);
+ expect(auth.signUp).toHaveBeenCalledWith(expect.objectContaining({options:{emailRedirectTo:`${origin}/auth/confirm?next=/start`}}));
+ auth.exchangeCodeForSession.mockResolvedValue({data:{},error:null});expect((await GET(new Request(`${origin}/auth/confirm?code=test&next=/start`))).headers.get('location')).toBe(`${origin}/auth/verified?next=/start`);
+});
 
 it('signs out only this browser session and prevents caching the logout response',async()=>{
   auth.signOut.mockResolvedValue({error:null});const response=await POST(request({action:'logout'}));

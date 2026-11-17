@@ -25,6 +25,7 @@ async function main() {
     const pending = migrations.filter(m => !applied.some(a => a.name === m.name));
     console.log(`Pending migrations: ${pending.map(m => m.name).join(', ') || '(none)'}`);
     if (!process.argv.includes('--apply')) { console.log('Dry run only. Use npm run db:migrate to apply this plan. Development seed is excluded.'); return; }
+    require('./saas-migration-gate.cjs').requireSaasEvidence(pending,process.env.DATABASE_URL,process.env.SAAS_MIGRATION_EVIDENCE,tables.rows.length>0);
     await client.query('BEGIN');
     try {
       await client.query("select pg_advisory_xact_lock(hashtext('edgedirect2u-migrations'))");

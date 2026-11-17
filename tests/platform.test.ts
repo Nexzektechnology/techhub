@@ -8,7 +8,7 @@ const [root,adminA,adminB,agentA,agentB,outsider]=ids;
 async function as<T>(id:string,action:()=>Promise<T>,aal='aal1'):Promise<T>{await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claims',$2,false)",[id,JSON.stringify({sub:id,aal})]);await db.exec('set role authenticated');try{return await action();}finally{await db.exec('reset role');}}
 async function scalar(sql:string,args:unknown[]=[]){const r=await db.query<{id:string}>(sql,args);return r.rows[0].id;}
 beforeAll(async()=>{
-  db=new PGlite();await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text unique,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;grant usage on schema auth to authenticated,anon;grant execute on function auth.uid() to authenticated,anon;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid,bucket_id text);alter table storage.objects enable row level security;`);
+  db=new PGlite();await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text unique,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;grant usage on schema auth to authenticated,anon;grant execute on function auth.uid() to authenticated,anon;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid,bucket_id text,name text);alter table storage.objects enable row level security;`);
   for(const file of readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).sort()){if(file.startsWith('009'))await db.exec('alter default privileges in schema public grant all on tables to authenticated');await db.exec(readFileSync(`supabase/migrations/${file}`,'utf8'));}
   for(let i=0;i<ids.length;i++)await db.query('insert into auth.users values($1,$2,now())',[ids[i],`person${i}@example.com`]);
   await db.query('insert into platform_admins(user_id) values($1)',[root]);
@@ -145,8 +145,8 @@ it('does not expose internal entitlement checks to direct client calls',async()=
 it('does not expose the flagship private commerce through new company-admin membership',async()=>{
   await as(adminA,async()=>{expect(await scalar('select app_role() id')).toBe('customer');await expect(db.query('select dashboard_metrics()')).rejects.toThrow('Forbidden');});
 });
-it('prevents unported modules from being enabled even by an administrator',async()=>{
-  const r=await db.query<{module:string;enabled:boolean}>('select module,enabled from platform_modules where company_id=$1 order by module',[companyA]);expect(r.rows.find(m=>m.module==='commerce')?.enabled).toBe(false);await expect(db.query("update platform_modules set enabled=true where company_id=$1 and module='commerce'",[companyA])).rejects.toThrow('check constraint');
+it('does not enable commerce implicitly and prevents unported delivery from being enabled',async()=>{
+  const r=await db.query<{module:string;enabled:boolean}>('select module,enabled from platform_modules where company_id=$1 order by module',[companyA]);expect(r.rows.find(m=>m.module==='commerce')?.enabled).toBe(false);await expect(db.query("update platform_modules set enabled=true where company_id=$1 and module='delivery'",[companyA])).rejects.toThrow('check constraint');
 });
 it('publishes brand drafts independently and rejects cross-company rollback',async()=>{
   const branded={...defaultTheme,name:'Company A published',primary:'#B93400'};

@@ -4,7 +4,7 @@ import { themeSchema } from './theme';
 export const FLAGSHIP_ID='10000000-0000-4000-8000-000000000001';
 export const companyRoles=['company_admin','supervisor','field_agent','vendor','customer'] as const;
 export type CompanyRole=typeof companyRoles[number];
-export type Company={id:string;slug:string;name:string;address:string;active:boolean;package:string;brand:Theme;brand_draft:Theme;geofence_metres:number;daily_target:number;allow_web_checkin:boolean};
+export type Company={id:string;slug:string;name:string;address:string;active:boolean;package:string;brand:Theme;brand_draft:Theme;geofence_metres:number;daily_target:number;allow_web_checkin:boolean;billing_access?:string};
 export type CompanyMember={company_id:string;user_id:string;role:CompanyRole;active:boolean;label:string};
 export type FieldStore={id:string;company_id:string;name:string;address:string;latitude:number|null;longitude:number|null;radius_metres:number|null;phone?:string;route?:string;legacy_customer_id?:string|null;location_source?:string;route_sequence?:number|null;location_review_reason?:string;is_test?:boolean};
 export type Assignment={id:string;company_id:string;store_id:string;agent_id:string;visit_date:string};

@@ -23,7 +23,7 @@ beforeAll(async()=>{
     create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
     grant usage on schema auth to authenticated,anon;grant execute on function auth.uid() to authenticated,anon;
     create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
-    create table storage.objects(id uuid,bucket_id text);alter table storage.objects enable row level security;`);
+    create table storage.objects(id uuid,bucket_id text,name text);alter table storage.objects enable row level security;`);
   for(const file of readdirSync('supabase/migrations').filter(n=>/^(00[1-9]|01[0-7])_.*\.sql$/.test(n)).sort())
     await db.exec(readFileSync(`supabase/migrations/${file}`,'utf8'));
   for(const [id,email] of [[admin,'admin@example.com'],[customer,'customer@example.com'],[merchant,'merchant@example.com']])

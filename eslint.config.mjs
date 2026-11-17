@@ -6,12 +6,14 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   { files: ['scripts/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
+  { files: ['tests/offline/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
   { files: ['server.js'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-e2e/**",
+    ".next-tenant-e2e/**",
     ".next-preview/**",
     "test-results/**",
     "playwright-report/**",
