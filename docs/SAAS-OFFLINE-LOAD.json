@@ -1,9 +1,9 @@
 {
-  "run_id": "7794b61a-c66d-4a3a-bd0d-c1dd371e3821",
-  "executed_at": "2026-11-16T23:07:08.330Z",
+  "run_id": "bdff7c55-dc34-49eb-b58a-49215d2ae5d6",
+  "executed_at": "2026-11-17T23:36:36.299Z",
   "mode": "offline-postgresql-fixture",
   "engine": "PGlite single PostgreSQL session; concurrent requests queued by client",
-  "source_sha256": "a71387eae23265e4ef9a941fcd9462b314b3cf804332de082852cbc71131bc5f",
+  "source_sha256": "59e02a1aa187682493ba5ea594209a223b30a862b21b83aa71216229fdd8917c",
   "companies": 100,
   "users": 1000,
   "active_companies": 100,
@@ -18,12 +18,12 @@
     "checkout": 200,
     "isolation": 200
   },
-  "setup_ms": 31052,
-  "elapsed_ms": 114432,
+  "setup_ms": 23438,
+  "elapsed_ms": 72891,
   "latency_ms": {
-    "p50": 969.05,
-    "p95": 2375.23,
-    "p99": 2595.59
+    "p50": 598.39,
+    "p95": 1496.31,
+    "p99": 2247.75
   },
   "failures": [],
   "failure_count": 0,

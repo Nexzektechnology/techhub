@@ -8,6 +8,10 @@ The authenticated live worker returned 200, processed zero charges and reported 
 
 The complete pre-adaptation regression passed 324 tests in 64 files. The final regression with hosted Auth permissions passed **327 tests in 65 files**. Lint passed. The five-minute Cron schedule completed an actual successful run, returned HTTP 200 and refreshed the worker heartbeat.
 
+## Current offline workload
+
+The post-hosting-compatibility run passed on 18 November 2026 (Africa/Lagos): **100 companies, 1000 active authenticated users, 300 products and 2000 operations at concurrency 20**, with zero failures and zero isolation failures. Source SHA-256: 59e02a1aa187682493ba5ea594209a223b30a862b21b83aa71216229fdd8917c; run bdff7c55-dc34-49eb-b58a-49215d2ae5d6. Setup: 23.438s; workload: 72.891s. Latency p50 598.39ms, p95 1496.31ms, p99 2247.75ms. The retained current report is SAAS-OFFLINE-LOAD.json. This is the single-session PGlite correctness workload, not production HTTP capacity.
+
 ## Historical offline evidence
 
 The following entries describe earlier source snapshots; their negative deployment statements are superseded by the hosted status above.
@@ -55,7 +59,7 @@ The expanded regression found and corrected shared directory-trigger compatibili
 
 ## Reproducible workload evidence
 
-The retained report is [SAAS-OFFLINE-LOAD.json](SAAS-OFFLINE-LOAD.json).
+The original historical report was superseded by the current report linked above; the following figures are retained as historical evidence.
 
 - Executed: `2026-11-16T23:07:08.330Z` (17 November, Africa/Lagos).
 - Run ID: `7794b61a-c66d-4a3a-bd0d-c1dd371e3821`.
