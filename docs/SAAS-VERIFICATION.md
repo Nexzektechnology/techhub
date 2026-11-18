@@ -88,3 +88,10 @@ Hosted validation is prepared through `npm run test:load:hosted` with a separate
 **Production acceptance remains open:** hosted PostgreSQL/PostgREST role behavior, real Auth/Storage restoration, actual Paystack/subaccount and failure responses, SMTP, HTTPS/DNS, process restarts, scheduled execution, alert delivery and representative pooled/HTTP load. The wider master brief also has outstanding modules documented in [SAAS-IMPLEMENTATION.md](SAAS-IMPLEMENTATION.md); this report does not claim that the entire enterprise platform is complete.
 
 The retained workload source hash identifies the historical offline snapshot and does not identify the later hosting changes. [Changed files](SAAS-CHANGES.md) lists the implementation paths.
+
+
+## Offline synchronization follow-up — 18 November 2026
+
+The new full regression passed 334 tests in 67 files. The additional ordered-fulfilment test and focused API tests subsequently passed all eight checks. Two Chrome acceptance scenarios passed actual service-worker cold reopening, encrypted storage, wrong-passphrase rejection, reconnect, lost-response replay, conflicts, safe cancellation, actor switching and mobile layout. TypeScript and lint passed. Local production webpack compilation passed; its standalone artifact is not distributable because the isolated node_modules junction caused tracing exclusions. Vercel publication of this change requires renewed device authorization. Migration 066 is installed, and a rollback-only actual Supabase probe verified stock replay, chained changes and company/warehouse isolation. No synthetic records were retained.
+
+The owner explicitly approved and opened Starter: 14-day trial, five employees, 100 MB, with commerce. No prices or Paystack payments were enabled. The owner password is set; authenticator setup remains with the owner. Desktop and Android build status is recorded in BIZHUB-APPS.md.
