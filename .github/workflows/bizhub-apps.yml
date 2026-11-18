@@ -29,10 +29,23 @@ jobs:
           gradle --no-daemon -p native/bizhub/android testStoreReleaseUnitTest lintStoreRelease assembleStoreRelease
           mkdir -p artifacts/bizhub
           cp native/bizhub/android/app/build/outputs/apk/store/release/app-store-release-unsigned.apk artifacts/bizhub/Nexzek-BizHub-unsigned.apk
+      - name: Sign with explicitly approved encrypted repository secrets
+        env:
+          KEYSTORE: ${{ secrets.BIZHUB_ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BIZHUB_ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BIZHUB_ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BIZHUB_ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE" || { echo 'Signing identity is not configured'; exit 1; }
+          printf '%s' "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/bizhub.p12"
+          chmod 600 "$RUNNER_TEMP/bizhub.p12"
+          trap 'rm -f "$RUNNER_TEMP/bizhub.p12"' EXIT
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/bizhub.p12" --ks-type PKCS12 --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --ks-key-alias "$ANDROID_KEY_ALIAS" --out artifacts/bizhub/Nexzek-BizHub.apk artifacts/bizhub/Nexzek-BizHub-unsigned.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs artifacts/bizhub/Nexzek-BizHub.apk
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: bizhub-unsigned-android
-          path: artifacts/bizhub/*
+          name: bizhub-android
+          path: artifacts/bizhub/Nexzek-BizHub.apk
   windows:
     runs-on: windows-latest
     timeout-minutes: 20
@@ -49,7 +62,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: bizhub-windows
-          path: artifacts/bizhub/windows/*
+          path: artifacts/bizhub/windows/Nexzek.BizHub.exe
   publish:
     if: ${{ always() && needs.windows.result == 'success' && (needs.android.result == 'success' || needs.android.result == 'skipped') }}
     needs: [android, windows]
@@ -60,7 +73,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
-          pattern: bizhub-windows
+          pattern: bizhub-*
           path: artifacts/bizhub
           merge-multiple: true
       - name: Publish installable apps and checksums
