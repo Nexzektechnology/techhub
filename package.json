@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node --use-system-ca node_modules/next/dist/bin/next dev --hostname 127.0.0.1",
-    "build": "node --use-system-ca node_modules/next/dist/bin/next build",
+    "dev": "node scripts/build-offline.cjs && node --use-system-ca node_modules/next/dist/bin/next dev --hostname 127.0.0.1",
+    "build": "node scripts/build-offline.cjs && node --use-system-ca node_modules/next/dist/bin/next build",
     "build:vercel": "node scripts/prepare-hostinger.cjs && npm run build",
     "build:saas": "node scripts/saas-hosting-preflight.cjs build && npm run build -- --webpack && node scripts/package-saas.cjs",
     "prepare:saas:release": "node scripts/prepare-saas-release.cjs",

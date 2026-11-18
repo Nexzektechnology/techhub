@@ -134,6 +134,23 @@
         "This release provides company catalogue, warehouse stock, orders, branded stores, scoped access and subscription billing. Legacy POS, advanced procurement/transfers, tenant refunds/reports, customer history and other enterprise additions are tracked separately; do not assume every legacy module is enabled for new companies."
       ],
       "note": "A labelled preview is for review. Real registration, uploads, billing, domain activation and scheduled processing require their hosting and service setup to be completed."
+    },
+    {
+      "id": "offline",
+      "title": "11. Work offline and synchronize",
+      "steps": [
+        "While connected, sign in and open your company’s Commerce & inventory workspace. Choose Prepare this device. Use a trusted personal device and create a separate offline passphrase.",
+        "Wait for Device prepared. Open Offline workspace and optionally install BizHub using your browser’s Install app or Add to Home Screen command. The saved copy is specific to your account and company.",
+        "Turn off data and reopen the app. Unlock the saved workspace using your offline passphrase. You can view downloaded products, locations, stock and order progress.",
+        "Receive or adjust stock, prepare product edits or new product drafts, and record order progress. Each change is labelled pending until the online server confirms it. New product drafts need confirmation before you can receive stock against them.",
+        "Leave the offline app open and unlocked when data returns. It synchronizes automatically; Sync now also starts synchronization. Sign in online again with the original account if the session expired.",
+        "Open Sync queue to check results. Connection retries reuse the same references. Online edits, insufficient stock, changed permissions and expired subscriptions require review; they are not silently overwritten.",
+        "Use Review online to inspect a conflict. Cancel after server check verifies whether the original change was already posted. Only create a replacement after reconciling its result.",
+        "Keep the offline passphrase and browser profile safe. Password recovery does not unlock the encrypted device copy. Do not clear browser/app data while changes await confirmation. The workspace locks after five minutes away or when you choose Lock.",
+        "Refresh a saved copy at least every seven days. Large companies may receive a labelled partial copy: at most 1,000 products, 4,000 stock rows and 1,000 orders.",
+        "Payments, new sign-ins, account setup, employee permissions and uploads require a connection. Offline mode cannot confirm a payment or guarantee stock across devices. Synchronization while the app is closed or locked is not promised."
+      ],
+      "note": "Use the central BizHub application for offline operations. Data is stored on this browser, not automatically copied to another phone. Remove a device copy only after syncing or safely cancelling all queued changes."
     }
   ],
   "sources": [

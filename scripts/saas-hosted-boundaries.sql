@@ -5,7 +5,7 @@ set local statement_timeout='30s';
 do $probe$
 declare owner_a uuid:=gen_random_uuid();owner_b uuid:=gen_random_uuid();staff uuid:=gen_random_uuid();
  company_a uuid:=gen_random_uuid();company_b uuid:=gen_random_uuid();
- branch_a uuid;branch_b uuid;warehouse_a text;warehouse_b text;role_id uuid;result jsonb;denied boolean;
+ branch_a uuid;branch_b uuid;warehouse_a text;warehouse_b text;role_id uuid;result jsonb;denied boolean;category_id text;product_id text;operation_id uuid:=gen_random_uuid();receipt jsonb;
 begin
  insert into auth.users(id,email,email_confirmed_at) values
  (owner_a,owner_a::text||'@hosting-probe.invalid',now()),
@@ -29,6 +29,13 @@ begin
  if result->>'company_id'<>company_a::text or current_setting('app.tenant_id',true)<>company_b::text then raise exception 'Company context not restored';end if;
  denied:=false;begin perform public.tenant_commerce_snapshot(company_b);exception when others then if sqlerrm like '%Forbidden%' then denied:=true;else raise;end if;end;
  if not denied then raise exception 'Cross-company RPC allowed';end if;
+ category_id:=public.tenant_commerce_command(company_a,'category','{"name":"Rollback probe goods"}')->>'id';
+ product_id:=public.tenant_commerce_command(company_a,'product',jsonb_build_object('name','Rollback probe product','slug','rollback-probe','category_id',category_id,'price_kobo',10000,'image','/window.svg','active',false,'options','{}'::jsonb))->>'id';
+ receipt:=public.tenant_sync_apply(company_a,operation_id,'stock',jsonb_build_object('warehouse_id',warehouse_a,'product_id',product_id,'delta',5,'reason','Rollback offline sync probe'),'absent');
+ if public.tenant_sync_apply(company_a,operation_id,'stock',jsonb_build_object('warehouse_id',warehouse_a,'product_id',product_id,'delta',5,'reason','Rollback offline sync probe'),'absent')<>receipt then raise exception 'Offline replay changed its result';end if;
+ perform public.tenant_sync_apply(company_a,gen_random_uuid(),'stock',jsonb_build_object('warehouse_id',warehouse_a,'product_id',product_id,'delta',2,'reason','Rollback chained sync probe'),null,operation_id);
+ result:=public.tenant_offline_snapshot(company_a);
+ if (select (i->>'on_hand')::integer from jsonb_array_elements(result->'data'->'inventory') i where i->>'product_id'=product_id)<>7 then raise exception 'Offline duplicate or dependent stock error';end if;
  begin
   if exists(select 1 from public.tenant_branches where company_id=company_b) then raise exception 'Cross-company direct rows visible';end if;
  exception when insufficient_privilege then null;end;
@@ -42,5 +49,5 @@ begin
  if has_schema_privilege(current_user,'edge_tenant_runtime','USAGE') then raise exception 'Private schema accessible';end if;
  reset role;
 end $probe$;
-select true as company_and_warehouse_boundaries_passed;
+select true as company_warehouse_and_offline_boundaries_passed;
 rollback;

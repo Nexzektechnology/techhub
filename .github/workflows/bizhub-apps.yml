@@ -1,0 +1,89 @@
+name: Build BizHub desktop and Android
+on:
+  workflow_dispatch:
+    inputs:
+      include_android:
+        type: boolean
+        default: false
+        description: Build signed Android app using approved signing secrets
+permissions:
+  contents: read
+jobs:
+  android:
+    if: ${{ inputs.include_android }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prepare verified build tools
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_17_X64/bin" >> "$GITHUB_PATH"
+          curl --fail --location --retry 3 https://services.gradle.org/distributions/gradle-8.13-bin.zip -o "$RUNNER_TEMP/gradle.zip"
+          printf '%s  %s\n' '20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78' "$RUNNER_TEMP/gradle.zip" | sha256sum --check -
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gradle-8.13/bin" >> "$GITHUB_PATH"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Restore approved private signing identity
+        env:
+          KEYSTORE: ${{ secrets.BIZHUB_ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE" || { echo 'Private signing approval/configuration is required'; exit 1; }
+          printf '%s' "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/bizhub.p12"
+          chmod 600 "$RUNNER_TEMP/bizhub.p12"
+      - name: Test and build signed Android app
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/bizhub.p12
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BIZHUB_ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BIZHUB_ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BIZHUB_ANDROID_KEY_PASSWORD }}
+        run: |
+          gradle --no-daemon -p native/bizhub/android testStoreReleaseUnitTest lintStoreRelease assembleStoreRelease bundleStoreRelease
+          mkdir -p artifacts/bizhub
+          cp native/bizhub/android/app/build/outputs/apk/store/release/app-store-release.apk artifacts/bizhub/Nexzek-BizHub.apk
+          cp native/bizhub/android/app/build/outputs/bundle/storeRelease/app-store-release.aab artifacts/bizhub/Nexzek-BizHub.aab
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose artifacts/bizhub/Nexzek-BizHub.apk
+          jarsigner -verify artifacts/bizhub/Nexzek-BizHub.aab
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bizhub-android
+          path: artifacts/bizhub/*
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build self-contained desktop app with stable .NET
+        shell: pwsh
+        run: |
+          dotnet publish native/bizhub/windows/Edgedirect2u.Store.csproj -c Release -r win-x64 -o artifacts/bizhub/windows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bizhub-windows
+          path: artifacts/bizhub/windows/*
+  publish:
+    if: ${{ always() && needs.windows.result == 'success' && (needs.android.result == 'success' || needs.android.result == 'skipped') }}
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: bizhub-*
+          path: artifacts/bizhub
+          merge-multiple: true
+      - name: Publish installable apps and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd artifacts/bizhub
+          sha256sum *.exe *.apk *.aab 2>/dev/null > SHA256SUMS.txt || test -s SHA256SUMS.txt
+          cd ../..
+          gh release view bizhub-v1.0.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create bizhub-v1.0.0 --target "$GITHUB_SHA" --title "Nexzek BizHub desktop and Android 1.0.0" --notes-file docs/BIZHUB-APPS.md
+          gh release upload bizhub-v1.0.0 artifacts/bizhub/* --clobber

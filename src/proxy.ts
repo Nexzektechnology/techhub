@@ -15,6 +15,15 @@ export async function proxy(request:NextRequest){
   if(entry?.status===421||entry?.status===307){const r=entry.status===307?NextResponse.redirect(entry.url,307):new NextResponse('Domain unavailable',{status:421});r.headers.set('Cache-Control','private, no-store');return r;}
   if(entry?.status===200){publicPath=entry.path;requestHeaders.set('x-saas-public-tenant',entry.slug);requestHeaders.set('x-saas-public-host',entry.host);requestHeaders.delete('cookie');}
  }
+ // Only this generic public shell is cached. Never run session refresh or
+ // attach private account HTML/cookies to an offline asset response.
+ if(['/bizhub-offline.html','/bizhub-offline.js','/bizhub-offline.css','/bizhub.webmanifest','/bizhub-sw.js','/bizhub.svg'].includes(request.nextUrl.pathname)){
+  const response=NextResponse.next({request:{headers:requestHeaders}});
+  response.headers.set('Cache-Control','public, max-age=0, must-revalidate');
+  response.headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'");
+  if(request.nextUrl.pathname==='/bizhub-sw.js'){response.headers.set('Cache-Control','no-cache, no-store, must-revalidate');response.headers.set('Service-Worker-Allowed','/');}
+  return response;
+ }
  const nonce=Buffer.from(crypto.randomUUID()).toString('base64'),dev=process.env.NODE_ENV!=='production';
  const csp=["default-src 'self'",`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev?" 'unsafe-eval'":''}`,"style-src 'self' 'unsafe-inline'","img-src 'self' https: data: blob:","font-src 'self'","object-src 'none'","base-uri 'self'","form-action 'self'","frame-src 'self'","frame-ancestors 'self'",`connect-src 'self'${dev?' ws: wss:':''}`,"worker-src 'self'",...(request.nextUrl.protocol==='https:'&&!dev?['upgrade-insecure-requests']:[])].join('; ');
  requestHeaders.set('x-nonce',nonce);requestHeaders.set('Content-Security-Policy',csp);

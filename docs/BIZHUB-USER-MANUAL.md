@@ -111,3 +111,8 @@ New-tenant POS, advanced procurement/transfers, tenant refunds/reports, customer
 - [Vercel cron scheduling limits](https://vercel.com/docs/cron-jobs/usage-and-pricing)
 
 The in-app guide is available at [the online manual](https://nexzekbizhub.vercel.app/manual), with a **Print or save as PDF** button.
+
+
+## Offline work
+
+While connected, open Commerce & inventory, choose **Prepare this device**, and set a separate offline passphrase. Open **Offline workspace** before turning data off. Saved products, stock adjustments and order progress can be used offline. Queued changes synchronize automatically while the app is open, unlocked and connected. Conflicts require review; retries do not apply the same transaction twice. Payments, new logins and account/permission setup require internet. Keep this browser profile until all changes are confirmed. See chapter 11 in the online manual for limits and recovery precautions.
