@@ -5,7 +5,7 @@ on:
       include_android:
         type: boolean
         default: false
-        description: Build signed Android app using approved signing secrets
+        description: Build Android package for local signing
 permissions:
   contents: read
 jobs:
@@ -24,29 +24,14 @@ jobs:
           unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/gradle-8.13/bin" >> "$GITHUB_PATH"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
-      - name: Restore approved private signing identity
-        env:
-          KEYSTORE: ${{ secrets.BIZHUB_ANDROID_KEYSTORE_BASE64 }}
+      - name: Test and build Android package without private signing credentials
         run: |
-          test -n "$KEYSTORE" || { echo 'Private signing approval/configuration is required'; exit 1; }
-          printf '%s' "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/bizhub.p12"
-          chmod 600 "$RUNNER_TEMP/bizhub.p12"
-      - name: Test and build signed Android app
-        env:
-          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/bizhub.p12
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BIZHUB_ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.BIZHUB_ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.BIZHUB_ANDROID_KEY_PASSWORD }}
-        run: |
-          gradle --no-daemon -p native/bizhub/android testStoreReleaseUnitTest lintStoreRelease assembleStoreRelease bundleStoreRelease
+          gradle --no-daemon -p native/bizhub/android testStoreReleaseUnitTest lintStoreRelease assembleStoreRelease
           mkdir -p artifacts/bizhub
-          cp native/bizhub/android/app/build/outputs/apk/store/release/app-store-release.apk artifacts/bizhub/Nexzek-BizHub.apk
-          cp native/bizhub/android/app/build/outputs/bundle/storeRelease/app-store-release.aab artifacts/bizhub/Nexzek-BizHub.aab
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose artifacts/bizhub/Nexzek-BizHub.apk
-          jarsigner -verify artifacts/bizhub/Nexzek-BizHub.aab
+          cp native/bizhub/android/app/build/outputs/apk/store/release/app-store-release-unsigned.apk artifacts/bizhub/Nexzek-BizHub-unsigned.apk
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: bizhub-android
+          name: bizhub-unsigned-android
           path: artifacts/bizhub/*
   windows:
     runs-on: windows-latest
@@ -75,7 +60,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
-          pattern: bizhub-*
+          pattern: bizhub-windows
           path: artifacts/bizhub
           merge-multiple: true
       - name: Publish installable apps and checksums

@@ -34,7 +34,7 @@ android {
     buildTypes {
         debug { applicationIdSuffix '.debug' }
         release {
-            signingConfig signingConfigs.distribution
+            if (System.getenv('ANDROID_KEYSTORE_PATH')) signingConfig signingConfigs.distribution
             minifyEnabled false
         }
     }
