@@ -1,13 +1,13 @@
-# BizHub deployment status — 18 November 2026
+# BizHub deployment status — 19 November 2026
 
 The core commerce release is live at [nexzekbizhub.vercel.app](https://nexzekbizhub.vercel.app). The [online user manual](https://nexzekbizhub.vercel.app/manual) includes business setup, stock, employee permissions, billing and domain instructions.
 
 ## Connected services
 
 - Vercel: nexzektechnology/nexzekbizhub, Node 24, Next.js 16.4.6, build:saas. Final production deployment dpl_FTBes3PmHtkuHRxiCt91XKb9uibS (source 1822093) passed installation, compilation, TypeScript and route generation.
-- Supabase: iipbmwpigedfslqybxmg. The initial catalog and Auth identity store were empty. All 62 original/core migrations committed atomically; the additive hosted Auth compatibility migration 064 brings the installed ledger to 63 files. Version 063 is reserved for separate, unreviewed Business OS work and is excluded from this release.
+- Supabase: iipbmwpigedfslqybxmg. The initial catalog and Auth identity store were empty. All 62 original/core migrations committed atomically. Additive hosted Auth compatibility migration 064 and offline commerce migration 066 bring the installed ledger to 64 exact-checksum files. Separate Business OS migrations are excluded; their overlapping version numbers must be resolved before integration.
 - GitHub: Nexzektechnology/techhub main received the core source. Hosting fixes and the updated manual were pushed as 1822093. Vercel could not connect its GitHub integration to the repository; CLI deployments work, but push-triggered deployment still needs the Vercel GitHub app authorized for this repository.
-- The confirmed owner identity has separate platform authorization. The owner must set a password and enroll an authenticator; privileged platform operations require MFA. No legacy commerce administrator privilege was granted to that identity.
+- The confirmed owner identity has separate platform authorization, a password and one verified MFA factor. Privileged platform operations require MFA. No legacy commerce administrator privilege was granted to that identity.
 - Supabase Auth uses the canonical production origin and a narrow callback allowlist. Email confirmation and TOTP remain enabled.
 - Twelve host environment variables were configured privately. No dotenv file or server credential was uploaded as source.
 
@@ -23,7 +23,17 @@ The core commerce release is live at [nexzekbizhub.vercel.app](https://nexzekbiz
 
 ## Service commissioning still required
 
-Public signup needs a published plan and a production SMTP sender. Paid checkout and subscription renewals need the correct Paystack credentials, published prices, verified settlement accounts and provider acceptance. The scheduler remains payment-paused until that configuration exists. Do not reuse another deployment's payment credentials.
+The owner approved and published Starter as a 14-day trial with five employees, 100 MB storage and commerce. Production email delivery still needs a configured SMTP sender. Paid checkout and subscription renewals need the correct Paystack credentials, published prices, verified settlement accounts and provider acceptance. The scheduler remains payment-paused until that configuration exists. Do not reuse another deployment's payment credentials.
+
+## Offline update and app delivery
+
+The offline commerce update and app-download links are on GitHub main at b1452ea. They are not yet live on Vercel. The prepared production source upload is isolated from the root E-Edge project. Vercel CLI credential refresh reached an additional email identity check for the existing account; publication awaits that one-time verification. Never commit account tokens or use an expired device code.
+
+Encrypted offline storage, cold reopening, reconnect, lost-response replay, conflict review, safe cancellation and actor isolation passed local Chrome acceptance. Migration 066 passed a rollback-only actual Supabase probe. Synchronization requires the app to be open, unlocked and connected; native device acceptance remains open.
+
+Windows and signed Android assets were successfully published in GitHub release [bizhub-v1.0.0](https://github.com/Nexzektechnology/techhub/releases/tag/bizhub-v1.0.0). Build and signature evidence, installation instructions and limitations are in BIZHUB-APPS.md.
+
+The additional Business OS work was backed up as d106701 on [codex/business-os-snapshot-20261119](https://github.com/Nexzektechnology/techhub/tree/codex/business-os-snapshot-20261119). That snapshot is separate from the tested production release and has not been applied to Supabase or deployed. Continuing local inventory changes are not automatically included in that snapshot.
 
 The requested nexzekbizhub.com and example wenlas.com returned no public DNS answers during inspection. Neither domain was bought, delegated or connected. Domain routing remains disabled until DNS and HTTPS are commissioned. Businesses can use central /store/<slug> paths meanwhile.
 

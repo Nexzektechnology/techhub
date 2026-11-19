@@ -1,6 +1,6 @@
 # SaaS testing, deployment and recovery
 
-The core release is hosted on Vercel and the designated Supabase project. Auth redirects, a separate platform owner and five-minute Supabase scheduling are configured. Payments, production SMTP, public plans, DNS, restore acceptance and hosted capacity still require commissioning. See [current deployment status](BIZHUB-DEPLOYMENT-PENDING.md).
+The core release is hosted on Vercel and the designated Supabase project. Auth redirects, a separate platform owner with verified MFA, the approved Starter trial and five-minute Supabase scheduling are configured. Payments, production SMTP, paid prices, DNS, restore acceptance and hosted capacity still require commissioning. See [current deployment status](BIZHUB-DEPLOYMENT-PENDING.md).
 
 ## Deployment identity and build
 
