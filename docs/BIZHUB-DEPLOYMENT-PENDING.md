@@ -4,9 +4,9 @@ The core commerce release is live at [nexzekbizhub.vercel.app](https://nexzekbiz
 
 ## Connected services
 
-- Vercel: nexzektechnology/nexzekbizhub, Node 24, Next.js 16.4.6, build:saas. Final production deployment dpl_FTBes3PmHtkuHRxiCt91XKb9uibS (source 1822093) passed installation, compilation, TypeScript and route generation.
+- Vercel: nexzektechnology/nexzekbizhub, Node 24, Next.js 16.4.6, build:saas. Production deployment dpl_4buMkPzsK4MeDiiTS1iiP76YiU6o serves the canonical domain with the offline release and requested blue-branding update (source 41ab8d0). Clean preview and production builds passed installation, compilation, TypeScript and page generation. Earlier offline-only deployment: dpl_ET2RXTZVW7KjpFUXfTSMCrgFktyD.
 - Supabase: iipbmwpigedfslqybxmg. The initial catalog and Auth identity store were empty. All 62 original/core migrations committed atomically. Additive hosted Auth compatibility migration 064 and offline commerce migration 066 bring the installed ledger to 64 exact-checksum files. Separate Business OS migrations are excluded; their overlapping version numbers must be resolved before integration.
-- GitHub: Nexzektechnology/techhub main received the core source. Hosting fixes and the updated manual were pushed as 1822093. Vercel could not connect its GitHub integration to the repository; CLI deployments work, but push-triggered deployment still needs the Vercel GitHub app authorized for this repository.
+- GitHub: Nexzektechnology/techhub main contains the offline release, app links, current verification evidence and requested branding changes. Vercel CLI authorization was renewed successfully. Push-triggered deployment still needs the Vercel GitHub app authorized for this repository; the verified release was published with the CLI.
 - The confirmed owner identity has separate platform authorization, a password and one verified MFA factor. Privileged platform operations require MFA. No legacy commerce administrator privilege was granted to that identity.
 - Supabase Auth uses the canonical production origin and a narrow callback allowlist. Email confirmation and TOTP remain enabled.
 - Twelve host environment variables were configured privately. No dotenv file or server credential was uploaded as source.
@@ -27,7 +27,7 @@ The owner approved and published Starter as a 14-day trial with five employees, 
 
 ## Offline update and app delivery
 
-The offline commerce update and app-download links are on GitHub main at b1452ea. They are not yet live on Vercel. The prepared production source upload is isolated from the root E-Edge project. Vercel CLI credential refresh reached an additional email identity check for the existing account; publication awaits that one-time verification. Never commit account tokens or use an expired device code.
+The offline commerce update, app-download links and blue-branding update are live on Vercel and pushed to GitHub main. The production upload was isolated from the root E-Edge project. Vercel's additional email identity check completed, and the production build is Ready with the canonical alias. Never commit account tokens or use an expired device code.
 
 Encrypted offline storage, cold reopening, reconnect, lost-response replay, conflict review, safe cancellation and actor isolation passed local Chrome acceptance. Migration 066 passed a rollback-only actual Supabase probe. Synchronization requires the app to be open, unlocked and connected; native device acceptance remains open.
 
@@ -36,6 +36,8 @@ Windows and signed Android assets were successfully published in GitHub release 
 The additional Business OS work was backed up as d106701 on [codex/business-os-snapshot-20261119](https://github.com/Nexzektechnology/techhub/tree/codex/business-os-snapshot-20261119). That snapshot is separate from the tested production release and has not been applied to Supabase or deployed. Continuing local inventory changes are not automatically included in that snapshot. Integration must resolve migration-number collisions and adapt function-level custom tenant settings to the hosted permission-compatible wrappers, without editing applied checksums.
 
 The 19 November complete offline regression passed 335 tests in 67 files. The current-source synthetic workload passed 100 companies, 1000 authenticated users and 2000 operations with zero failures or isolation failures. See SAAS-VERIFICATION.md and SAAS-OFFLINE-LOAD.json; these local checks do not certify hosted capacity.
+
+The subsequent blue-branding changes passed 32 focused catalogue, tenant, onboarding and offline-sync checks. Browser checks verified blue registration controls, pale blue text selection, the Nexzekbizhub.com homepage example and independent company colours. The inventory browser scenario passed default publication, product editing, four received units appearing in the public store and a subsequent receipt updating availability to seven without republishing. Actual production Chrome acceptance at 390px verified the updated pages, downloads, offline cold reopening/reload, reconnection and zero private cache entries or page errors. Public assets returned 200 without session cookies; unauthenticated sync, worker and platform-health requests returned 401. The structured public result is BIZHUB-LIVE-SMOKE.json.
 
 The requested nexzekbizhub.com and example wenlas.com returned no public DNS answers during inspection. Neither domain was bought, delegated or connected. Domain routing remains disabled until DNS and HTTPS are commissioned. Businesses can use central /store/<slug> paths meanwhile.
 

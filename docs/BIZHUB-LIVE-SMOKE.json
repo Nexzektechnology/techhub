@@ -1,0 +1,95 @@
+{
+  "executed_at": "2026-11-19T10:08:42.064Z",
+  "origin": "https://nexzekbizhub.vercel.app",
+  "passed": true,
+  "limits": "Anonymous public deployment acceptance; private synchronization is separately covered by local browser acceptance and rollback-only hosted database probes.",
+  "results": [
+    {
+      "path": "/",
+      "status": 200,
+      "cache_control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/manual",
+      "status": 200,
+      "cache_control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/apps",
+      "status": 200,
+      "cache_control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/bizhub-offline.html",
+      "status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/bizhub-offline.js",
+      "status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/bizhub-offline.css",
+      "status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/bizhub-sw.js",
+      "status": 200,
+      "cache_control": "no-cache, no-store, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/bizhub.webmanifest",
+      "status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "set_cookie": false
+    },
+    {
+      "path": "/api/tenant/anonymous-smoke/sync",
+      "status": 401,
+      "cache_control": "no-store",
+      "set_cookie": false
+    },
+    {
+      "path": "/api/tenant/anonymous-smoke/sync",
+      "status": 401,
+      "cache_control": "no-store",
+      "set_cookie": false
+    },
+    {
+      "path": "/api/saas/jobs",
+      "status": 401,
+      "cache_control": "private, no-store",
+      "set_cookie": false
+    },
+    {
+      "path": "/api/platform/health",
+      "status": 401,
+      "cache_control": "no-store",
+      "set_cookie": false
+    },
+    {
+      "browser": "Chrome",
+      "mobile_width": 390,
+      "offline_cold_reopen": true,
+      "offline_reload": true,
+      "private_cache_entries": 0,
+      "page_errors": 0,
+      "cached_public_assets": [
+        "/bizhub-offline.html",
+        "/bizhub-offline.js",
+        "/bizhub-offline.css",
+        "/bizhub.webmanifest",
+        "/bizhub.svg"
+      ]
+    }
+  ]
+}
