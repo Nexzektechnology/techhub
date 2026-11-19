@@ -33,7 +33,9 @@ Encrypted offline storage, cold reopening, reconnect, lost-response replay, conf
 
 Windows and signed Android assets were successfully published in GitHub release [bizhub-v1.0.0](https://github.com/Nexzektechnology/techhub/releases/tag/bizhub-v1.0.0). Build and signature evidence, installation instructions and limitations are in BIZHUB-APPS.md.
 
-The additional Business OS work was backed up as d106701 on [codex/business-os-snapshot-20261119](https://github.com/Nexzektechnology/techhub/tree/codex/business-os-snapshot-20261119). That snapshot is separate from the tested production release and has not been applied to Supabase or deployed. Continuing local inventory changes are not automatically included in that snapshot.
+The additional Business OS work was backed up as d106701 on [codex/business-os-snapshot-20261119](https://github.com/Nexzektechnology/techhub/tree/codex/business-os-snapshot-20261119). That snapshot is separate from the tested production release and has not been applied to Supabase or deployed. Continuing local inventory changes are not automatically included in that snapshot. Integration must resolve migration-number collisions and adapt function-level custom tenant settings to the hosted permission-compatible wrappers, without editing applied checksums.
+
+The 19 November complete offline regression passed 335 tests in 67 files. The current-source synthetic workload passed 100 companies, 1000 authenticated users and 2000 operations with zero failures or isolation failures. See SAAS-VERIFICATION.md and SAAS-OFFLINE-LOAD.json; these local checks do not certify hosted capacity.
 
 The requested nexzekbizhub.com and example wenlas.com returned no public DNS answers during inspection. Neither domain was bought, delegated or connected. Domain routing remains disabled until DNS and HTTPS are commissioned. Businesses can use central /store/<slug> paths meanwhile.
 

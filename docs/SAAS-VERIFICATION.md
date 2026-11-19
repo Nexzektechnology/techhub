@@ -1,4 +1,4 @@
-# Hosted verification — 18 November 2026
+# Hosted and offline verification — 19 November 2026
 
 The core is live at https://nexzekbizhub.vercel.app; manual: https://nexzekbizhub.vercel.app/manual. Vercel production compilation, TypeScript and route generation passed on Node 24. Actual HTTPS home/manual/login/start returned 200, worker/platform health denied unauthenticated access, and the three public mobile pages passed without overflow or page errors.
 
@@ -10,7 +10,9 @@ The complete pre-adaptation regression passed 324 tests in 64 files. The final r
 
 ## Current offline workload
 
-The post-hosting-compatibility run passed on 18 November 2026 (Africa/Lagos): **100 companies, 1000 active authenticated users, 300 products and 2000 operations at concurrency 20**, with zero failures and zero isolation failures. Source SHA-256: 59e02a1aa187682493ba5ea594209a223b30a862b21b83aa71216229fdd8917c; run bdff7c55-dc34-49eb-b58a-49215d2ae5d6. Setup: 23.438s; workload: 72.891s. Latency p50 598.39ms, p95 1496.31ms, p99 2247.75ms. The retained current report is SAAS-OFFLINE-LOAD.json. This is the single-session PGlite correctness workload, not production HTTP capacity.
+The current offline-release workload passed on 19 November 2026 (Africa/Lagos): **100 companies, 1000 active authenticated users, 300 products and 2000 operations at concurrency 20**, with zero failures and zero isolation failures. Source SHA-256: aa23275de90d778828d31248911b716598cdcf1074db601aef8c5677a9fd0f83; run aa5889ab-d532-41a4-a32e-c87d05beea95. Setup: 33.565s; workload: 122.664s. Latency p50 1071.09ms, p95 2632.58ms, p99 2873.99ms. The retained current report is SAAS-OFFLINE-LOAD.json. This is the single-session PGlite correctness workload, not production HTTP capacity. The complete regression on the same release passed **335 tests in 67 files** in 362.50s.
+
+The earlier post-hosting-compatibility run on 18 November passed the same company/user/operation counts with no failures. Its source was 59e02a1aa187682493ba5ea594209a223b30a862b21b83aa71216229fdd8917c, run bdff7c55-dc34-49eb-b58a-49215d2ae5d6; workload 72.891s, p50 598.39ms, p95 1496.31ms and p99 2247.75ms. Those timings describe a different source snapshot and local run, not hosted capacity.
 
 ## Historical offline evidence
 
@@ -92,6 +94,6 @@ The retained workload source hash identifies the historical offline snapshot and
 
 ## Offline synchronization follow-up — 18 November 2026
 
-The new full regression passed 334 tests in 67 files. The additional ordered-fulfilment test and focused API tests subsequently passed all eight checks. Two Chrome acceptance scenarios passed actual service-worker cold reopening, encrypted storage, wrong-passphrase rejection, reconnect, lost-response replay, conflicts, safe cancellation, actor switching and mobile layout. TypeScript and lint passed. Local production webpack compilation passed; its standalone artifact is not distributable because the isolated node_modules junction caused tracing exclusions. Vercel publication of this change requires renewed device authorization. Migration 066 is installed, and a rollback-only actual Supabase probe verified stock replay, chained changes and company/warehouse isolation. No synthetic records were retained.
+The new full regression initially passed 334 tests in 67 files. After adding the ordered-fulfilment case, the complete 19 November rerun passed all 335 tests in 67 files. Two Chrome acceptance scenarios passed actual service-worker cold reopening, encrypted storage, wrong-passphrase rejection, reconnect, lost-response replay, conflicts, safe cancellation, actor switching and mobile layout. TypeScript and lint passed. Local production webpack compilation passed; its standalone artifact is not distributable because the isolated node_modules junction caused tracing exclusions. Vercel publication of this change requires renewed device authorization. Migration 066 is installed, and a rollback-only actual Supabase probe verified stock replay, chained changes and company/warehouse isolation. No synthetic records were retained.
 
 The owner explicitly approved and opened Starter: 14-day trial, five employees, 100 MB, with commerce. No prices or Paystack payments were enabled. The owner password is set and one MFA factor is verified. Desktop and Android build status is recorded in BIZHUB-APPS.md.
