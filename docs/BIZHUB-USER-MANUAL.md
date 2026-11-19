@@ -26,6 +26,10 @@ Open **Commerce & inventory** from your company workspace.
 4. In **Inventory**, choose the product and warehouse, enter a positive quantity to receive stock and give a reason. A negative quantity records a correction.
 5. Review on-hand, reserved and available stock. Creating a product does not receive stock, and stock cannot be reduced below the amount already reserved.
 
+New products have **Publish product** selected by default. Clear it to keep an item as a private draft. Once the storefront is published, published product names, images, prices and stock are read directly from the same company inventory records. Receive stock into the storefront's selected fulfilment warehouse to make that quantity available to shoppers. Saved offline changes appear after synchronization; there is no second website catalogue to maintain.
+
+BizHub uses blue by default, including a lighter blue text highlight. Each company can publish its own primary and accent colours in **Branding**; those choices apply to its workspace and storefront.
+
 ## Employees and permissions
 
 Invite the employee in the company's **Team** area first. They must confirm their account.

@@ -1,0 +1,25 @@
+/* Platform defaults are blue; inline company theme tokens remain authoritative. */
+html[data-platform="bizhub"] {
+  --brand-primary: #2457c5;
+  --brand-secondary: #142747;
+  --brand-accent: #dce8ff;
+  --page-background: #f6f8fd;
+  --surface-color: #ffffff;
+  --text-color: #15233f;
+  --muted-color: #526078;
+  --border-color: #dbe3f3;
+  --hero-background: #edf2fc;
+  --warning: #3765b6;
+}
+html[data-platform="bizhub"] input { accent-color: var(--brand-primary); }
+html[data-platform="bizhub"] .password-toggle:hover {
+  background: color-mix(in srgb, var(--brand-primary) 9%, white);
+  color: var(--brand-primary);
+}
+html[data-platform="bizhub"] .password-toggle:focus-visible,
+html[data-platform="bizhub"] .logout-button:focus-visible {
+  outline-color: var(--brand-primary);
+}
+html[data-platform="bizhub"] .platform-panel .clock-primary {
+  box-shadow: 0 5px 15px color-mix(in srgb, var(--brand-primary) 8%, transparent);
+}

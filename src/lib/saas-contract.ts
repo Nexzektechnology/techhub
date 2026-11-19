@@ -10,7 +10,8 @@ export const onboardInput=z.object({
  primary:z.string().regex(/^#[0-9a-fA-F]{6}$/),
 }).strict();
 export function companyTheme(name:string,primary:string,email:string,phone:string):Theme{
- return {...defaultTheme,name:name.slice(0,60),primary,email,phone,logo:'',lightLogo:'',darkLogo:'',mobileLogo:'',favicon:'',
+ const accent='#'+[1,3,5].map(i=>Math.round(255*.82+parseInt(primary.slice(i,i+2),16)*.18).toString(16).padStart(2,'0')).join('');
+ return {...defaultTheme,name:name.slice(0,60),primary,accent,heroBackground:accent,email,phone,logo:'',lightLogo:'',darkLogo:'',mobileLogo:'',favicon:'',
  tagline:'Your company workspace',description:'',seoTitle:name,seoDescription:'',copyright:`© ${new Date().getFullYear()} ${name}`,
  navigation:[],footerLinks:[],announcement:'',announcementEnabled:false,heroTitle:name,heroText:'',heroImage:'',heroMobileImage:''};
 }

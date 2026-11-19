@@ -1,6 +1,6 @@
 /* Shared storefront and workspace refinements; published theme tokens remain authoritative. */
 html { scroll-behavior: smooth; }
-::selection { background: var(--brand-accent); color: var(--brand-secondary); }
+::selection { background: color-mix(in srgb, var(--brand-primary) 18%, white); color: var(--text-color); }
 .skip-link { position: fixed; left: 20px; top: -70px; z-index: 2000; padding: 14px 20px; background: var(--brand-secondary); color: white; border-radius: 8px; }
 .skip-link:focus { top: 12px; }
 .announcement { font-size: 12px; min-height: 38px; }

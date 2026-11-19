@@ -7,6 +7,7 @@
 @import './business.css';
 @import './field.css';
 @import './saas.css';
+@import './bizhub-theme.css';
 
 /* The supplied round emblem needs its own proportions in every workspace. */
 .logo.official-logo{display:inline-flex;align-items:center;gap:10px;flex-shrink:0;letter-spacing:0}

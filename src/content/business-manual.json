@@ -1,7 +1,7 @@
 {
   "title": "Nexzek BizHub user manual",
   "subtitle": "A practical guide for business owners, employees and the platform operator.",
-  "updated": "18 November 2026",
+  "updated": "19 November 2026",
   "sections": [
     {
       "id": "start",
@@ -22,11 +22,11 @@
         "Open your company workspace, then Commerce & inventory. Your plan must include commerce.",
         "In Locations, create a branch, then add a warehouse within that branch.",
         "In Products, create a category. Add a product with its name, URL slug, price in naira, image URL and description. Add choices such as Size if needed.",
-        "Save the product. Use Edit product to change its details or turn publishing on or off.",
+        "Publish product is selected for new products. Clear it to keep a private draft, or save it to include the product in your published storefront. Use Edit product to update its details or publishing status.",
         "In Inventory, select the warehouse and product. Enter a positive quantity to receive stock, or a negative quantity to make a correction. Record a clear reason.",
         "Review on-hand, reserved and available quantities. A stock correction cannot reduce inventory below the quantity already reserved."
       ],
-      "note": "Creating a product does not receive stock. Receive stock separately in the correct warehouse."
+      "note": "Creating a product does not receive stock. Receive stock in the storefront's selected fulfilment warehouse. Your published website uses the same product, price and inventory records, so there is no duplicate catalogue to maintain. Offline changes appear after synchronization."
     },
     {
       "id": "team",
