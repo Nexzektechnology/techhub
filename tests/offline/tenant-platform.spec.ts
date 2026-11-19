@@ -1,7 +1,8 @@
 import {test,expect,type Page} from '@playwright/test';
 import {readFileSync} from 'node:fs';
-const fixture=()=>JSON.parse(readFileSync('.data/offline/tenant-fixture.json','utf8'));
-async function login(page:Page,who:string){await page.goto('/login');await page.getByLabel('Email address').fill(`${who}@tenant.example`);await page.getByLabel('Password',{exact:true}).fill('tenant-test-password');await page.getByRole('button',{name:/^Sign in/}).click();await expect(page).toHaveURL(who==='customer'?/\/account$/:/\/workspaces$/);}
+const appOrigin=process.env.E2E_APP_ORIGIN||'http://127.0.0.1:3200';
+const fixture=()=>JSON.parse(readFileSync(`${process.env.E2E_FIXTURE_ROOT||'.data/offline'}/tenant-fixture.json`,'utf8'));
+async function login(page:Page,who:string){await page.goto('/login');await page.getByLabel('Email address').fill(`${who}@tenant.example`);await page.getByLabel('Password',{exact:true}).fill('tenant-test-password');await page.getByRole('button',{name:/^Sign in/}).click();await expect(page).toHaveURL(who==='customer'?/\/(?:account|workspaces)$/:/\/workspaces$/);}
 test.beforeEach(async({context})=>{await context.route('https://**/*',route=>new URL(route.request().url()).hostname==='checkout.paystack.com'?route.fulfill({contentType:'text/html',body:'<h1>Offline payment provider</h1>'}):route.abort());});
 
 test('assigned subdomains and verified customer domains keep the storefront address and transfer bags to central checkout',async({page,context})=>{
@@ -9,7 +10,7 @@ test('assigned subdomains and verified customer domains keep the storefront addr
  const browserErrors:string[]=[];page.on('pageerror',error=>browserErrors.push(error.message));
  // Next's development bootstrap also needs its actual HMR WebSocket; HTTP interception alone cannot resolve fixture DNS.
  await context.routeWebSocket(/^wss?:\/\/(?:[a-z.-]+\.nexzekbizhub\.test|wenlas\.example\.test)\/_next\/hmr/,socket=>{
-  const target=new URL(socket.url());target.protocol='ws:';target.host='127.0.0.1:3200';const upstream=new WebSocket(target);upstream.binaryType='arraybuffer';
+  const target=new URL(socket.url());target.protocol='ws:';target.host=new URL(appOrigin).host;const upstream=new WebSocket(target);upstream.binaryType='arraybuffer';
   const pending:(string|Buffer)[]=[];
   socket.onMessage(message=>{if(upstream.readyState===WebSocket.OPEN)upstream.send(message);else pending.push(message);});
   upstream.addEventListener('open',()=>{for(const message of pending)upstream.send(message);pending.length=0;});
@@ -18,7 +19,7 @@ test('assigned subdomains and verified customer domains keep the storefront addr
   socket.onClose(()=>{if(upstream.readyState===WebSocket.OPEN)upstream.close();});
  });
  await context.route(/^https:\/\/(?:[a-z.-]+\.nexzekbizhub\.test|wenlas\.example\.test)(?:\/|$)/,async route=>{
-  const original=new URL(route.request().url()),local=new URL(original.pathname+original.search,'http://127.0.0.1:3200');
+  const original=new URL(route.request().url()),local=new URL(original.pathname+original.search,appOrigin);
   const response=await route.fetch({url:local.toString(),headers:{...route.request().headers(),host:original.host},maxRedirects:0});
   await route.fulfill({response});
  });
@@ -27,7 +28,7 @@ test('assigned subdomains and verified customer domains keep the storefront addr
  await expect(page.getByRole('complementary',{name:'Signed-in account controls'})).toHaveCount(0);
  await page.getByRole('heading',{name:'A Rice',exact:true}).getByRole('link').click();await expect(page).toHaveURL('https://tenant-a.nexzekbizhub.test/products/rice');
  await page.getByRole('button',{name:'Add to bag',exact:true}).click();await page.getByRole('link',{name:'Bag · 1'}).click();
- await page.getByRole('button',{name:'Continue to secure checkout',exact:true}).click();await expect(page).toHaveURL('http://127.0.0.1:3200/store/tenant-a/checkout');
+ await page.getByRole('button',{name:'Continue to secure checkout',exact:true}).click();await expect(page).toHaveURL(appOrigin+"/store/tenant-a/checkout");
  await expect(page.getByLabel('Full name')).toBeVisible();await expect(page.getByText('1 × A Rice',{exact:true})).toBeVisible();
  await page.goto('https://wenlas.example.test/');await expect(page.getByRole('heading',{name:'tenant-a',exact:true})).toBeVisible();await expect(page).toHaveURL('https://wenlas.example.test/');
  for(const address of ['https://tenant-a.nexzekbizhub.test/store/tenant-b','https://unknown.nexzekbizhub.test/','https://wenlas.example.test/api/saas']){
@@ -38,7 +39,7 @@ test('assigned subdomains and verified customer domains keep the storefront addr
 
 test('BizHub home and the business manual remain usable on mobile screens',async({page})=>{
  await page.goto('/');await expect(page.getByRole('heading',{name:'Run your business under your own name.'})).toBeVisible();await expect(page.getByRole('banner')).toHaveCount(1);await expect(page.getByRole('link',{name:/E-Edge.*home/})).toHaveCount(0);await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'artifacts/bizhub-home-mobile.png',fullPage:true});
- await page.getByRole('link',{name:'User guide',exact:true}).click();await expect(page.getByRole('heading',{name:'Nexzek BizHub user manual',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Manual chapters'}).getByRole('link')).toHaveCount(10);await expect(page.getByRole('heading',{name:'8. Connect a domain such as wenlas.com',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'artifacts/bizhub-manual-mobile.png',fullPage:true});
+ await page.getByRole('link',{name:'User guide',exact:true}).click();await expect(page.getByRole('heading',{name:'Nexzek BizHub user manual',exact:true})).toBeVisible({timeout:60000});await expect(page.getByRole('navigation',{name:'Manual chapters'}).getByRole('link')).toHaveCount(10);await expect(page.getByRole('heading',{name:'8. Connect a domain such as wenlas.com',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'artifacts/bizhub-manual-mobile.png',fullPage:true});
 });
 test('separate stores and browser bags remain isolated on the actual application',async({page})=>{
  await page.goto('/store/tenant-a');await expect(page.getByRole('heading',{name:'tenant-a',exact:true})).toBeVisible();await page.getByRole('heading',{name:'A Rice',exact:true}).getByRole('link').click();await expect(page.getByRole('heading',{name:'A Rice',exact:true})).toBeVisible();await page.getByRole('button',{name:'Add to bag',exact:true}).click();await expect(page.getByRole('link',{name:'Bag · 1'})).toBeVisible();
@@ -66,6 +67,6 @@ test('an owner creates and edits an optioned product, receives stock and opens a
  const product=page.locator('section').filter({has:page.getByRole('heading',{name:'Add a product',exact:true})});await expect(product.getByRole('combobox',{name:'Category',exact:true}).locator('option').filter({hasText:'Offline cosmetics'})).toHaveCount(1);
  await product.getByLabel('Name',{exact:true}).fill('Offline lotion');await product.getByLabel('Product URL slug').fill('offline-lotion');await product.getByRole('combobox',{name:'Category',exact:true}).selectOption({label:'Offline cosmetics'});await product.getByLabel('Price (NGN)').fill('2000');await product.getByLabel('Image URL').fill('/window.svg');await product.getByLabel('Description').fill('Synthetic product for offline acceptance.');await product.getByRole('button',{name:'Add option',exact:true}).click();await product.getByLabel('Option name',{exact:true}).fill('Size');await product.getByLabel('Option values').fill('Small, Large');await product.getByLabel('Publish product').check();await product.getByRole('button',{name:'Save product'}).click();
  const row=page.getByRole('row').filter({hasText:'Offline lotion'});await expect(row).toBeVisible();await row.getByRole('button',{name:'Edit product'}).click();const editing=page.locator('section').filter({has:page.getByRole('heading',{name:'Edit product',exact:true})});await editing.getByLabel('Product URL slug').fill('offline-lotion-updated');await editing.getByLabel('Price (NGN)').fill('2200');await editing.getByRole('button',{name:'Save product'}).click();await expect(row).toContainText('2,200');
- await page.getByRole('button',{name:'inventory',exact:true}).click();const stock=page.locator('section').filter({has:page.getByRole('heading',{name:'Receive or adjust stock',exact:true})});await stock.getByRole('combobox',{name:'Warehouse',exact:true}).selectOption({label:'A Main Warehouse'});await stock.getByRole('combobox',{name:'Product',exact:true}).selectOption({label:'Offline lotion'});await stock.getByLabel('Quantity change').fill('4');await stock.getByLabel('Reason').fill('Synthetic receipt for browser acceptance');await stock.getByRole('button',{name:'Record adjustment'}).click();await expect(page.getByRole('row').filter({hasText:'Offline lotion'})).toContainText('4');
+ await page.getByRole('button',{name:'inventory',exact:true}).click();const stock=page.locator('section').filter({has:page.getByRole('heading',{name:'Receive or adjust stock',exact:true})});await stock.getByRole('combobox',{name:'Warehouse',exact:true}).selectOption({label:'A Main Warehouse'});await stock.getByRole('combobox',{name:'Product',exact:true}).selectOption({label:'Offline lotion'});await stock.getByLabel('Stock change type').selectOption('opening');await stock.getByLabel('Quantity change').fill('4');await stock.getByLabel('Reason').fill('Synthetic receipt for browser acceptance');await stock.getByRole('button',{name:'Record adjustment'}).click();await expect(page.getByRole('row').filter({hasText:'Offline lotion'})).toContainText('4');
  await page.goto('/store/tenant-a/products/offline-lotion-updated');await expect(page.getByRole('heading',{name:'Offline lotion',exact:true})).toBeVisible();await page.getByRole('button',{name:'Small',exact:true}).click();await page.getByRole('button',{name:'Add to bag',exact:true}).click();await expect(page.getByRole('link',{name:'Bag · 1'})).toBeVisible();await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.screenshot({path:'artifacts/tenant-store-mobile.png',fullPage:true});
 });

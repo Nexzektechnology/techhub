@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:tenant:e2e": "playwright test --config playwright.tenant.config.ts",
+    "test:business:e2e": "playwright test --config playwright.business.config.ts",
     "test:load:offline": "node scripts/tenant-load.cjs",
     "test:load:hosted": "node scripts/tenant-load.cjs --hosted",
     "ops:billing": "node --use-system-ca scripts/saas-worker.cjs",

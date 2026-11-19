@@ -38,7 +38,11 @@
     ".next-e2e/types/**/*.ts",
     ".next-e2e/dev/types/**/*.ts",
     ".next-tenant-e2e/types/**/*.ts",
-    ".next-tenant-e2e/dev/types/**/*.ts"
+    ".next-tenant-e2e/dev/types/**/*.ts",
+    ".data/next-business-e2e/types/**/*.ts",
+    ".data/next-business-e2e/dev/types/**/*.ts",
+    ".data/next-business-build/types/**/*.ts",
+    ".data/next-business-build/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import type {Product,Order,Category} from './types';
 import type {Theme} from './theme';
-export const tenantPermissions=['catalogue.read','catalogue.edit','inventory.read','inventory.adjust','orders.read','orders.manage','finance.read','finance.manage','procurement.manage','reports.read','locations.manage','team.manage','storefront.manage'] as const;
+export const tenantPermissions=['catalogue.read','catalogue.edit','inventory.read','inventory.adjust','orders.read','orders.manage','finance.read','finance.manage','procurement.manage','reports.read','locations.manage','team.manage','storefront.manage','affiliates.read','affiliates.manage','affiliates.approve'] as const;
 const id=z.string().min(1).max(100),name=z.string().trim().min(2).max(100),location={id:id.optional(),name,address:z.string().max(500).default('')};
 export const tenantCommand=z.discriminatedUnion('action',[
  z.object({action:z.literal('branch'),data:z.object({...location,id:z.uuid().optional()}).strict()}),
@@ -9,7 +9,7 @@ export const tenantCommand=z.discriminatedUnion('action',[
  z.object({action:z.literal('category'),data:z.object({id:id.optional(),name,parent_id:id.optional()}).strict()}),
  z.object({action:z.literal('product'),data:z.object({id:id.optional(),name:z.string().trim().min(2).max(200),slug:z.string().max(100).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),category_id:id,brand:z.string().max(100).default(''),price_kobo:z.number().int().min(1).max(1000000000),image:z.string().max(1000).refine(v=>/^https:\/\//.test(v)||/^\/(?!\/)/.test(v),'Use an HTTPS or local image URL'),description:z.string().max(10000).default(''),options:z.record(z.string().min(1).max(60),z.array(z.string().min(1).max(80)).min(1).max(50)).default({}),active:z.boolean()}).strict()}),
  z.object({action:z.literal('stock'),data:z.object({warehouse_id:id,product_id:id,delta:z.number().int().min(-1000000).max(1000000).refine(n=>n!==0),reason:z.string().trim().min(5).max(500)}).strict()}),
- z.object({action:z.literal('role'),data:z.object({id:z.uuid().optional(),name,permissions:z.array(z.enum(tenantPermissions)).min(1).max(13),active:z.boolean()}).strict()}),
+ z.object({action:z.literal('role'),data:z.object({id:z.uuid().optional(),name,permissions:z.array(z.enum(tenantPermissions)).min(1).max(30),active:z.boolean()}).strict()}),
  z.object({action:z.literal('binding'),data:z.object({id:z.uuid().optional(),user_id:z.uuid(),role_id:z.uuid(),scope:z.enum(['company','branch','warehouse']),branch_id:z.uuid().optional(),warehouse_id:id.optional(),active:z.boolean().default(true)}).strict()}),
  z.object({action:z.literal('storefront'),data:z.object({warehouse_id:id,delivery_kobo:z.number().int().min(0).max(100000000),published:z.boolean()}).strict()}),
  z.object({action:z.literal('order-status'),data:z.object({id:z.uuid(),status:z.enum(['ready_for_dispatch','delivered'])}).strict()}),

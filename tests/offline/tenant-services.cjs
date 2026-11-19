@@ -1,11 +1,15 @@
 // Offline integration fixture only. Real application APIs + PostgreSQL RLS,
 // simulated identity/payment providers. Never included in the deployed app.
 if(process.env.NODE_ENV==='production')throw Error('Offline fixtures cannot run in production');
-const http=require('node:http'),crypto=require('node:crypto'),fs=require('node:fs');
-fs.mkdirSync('.data/offline',{recursive:true});
-require('esbuild').buildSync({entryPoints:['tests/helpers/tenant-db.ts'],outfile:'.data/offline/tenant-db.cjs',bundle:true,platform:'node',format:'cjs',packages:'external',logLevel:'silent'});
-const {tenantDatabase,actors,identity,value,company}=require('../../.data/offline/tenant-db.cjs');
-const ORIGIN='http://127.0.0.1:54329',APP='http://127.0.0.1:3200',jwtSecret='offline-fixture-signing-key',control='offline-fixture-control';
+const http=require('node:http'),crypto=require('node:crypto'),fs=require('node:fs'),path=require('node:path');
+const fixtureRoot=path.resolve(process.env.E2E_FIXTURE_ROOT||'.data/offline'),servicePort=Number(process.env.E2E_SERVICE_PORT||54329);
+const intendedRoot=path.resolve('.data');if(!fixtureRoot.startsWith(intendedRoot+path.sep))throw Error('Fixture output must stay inside .data');
+if(!Number.isInteger(servicePort)||servicePort<1024||servicePort>65535)throw Error('Invalid fixture port');
+fs.mkdirSync(fixtureRoot,{recursive:true});
+const helper=path.join(fixtureRoot,'tenant-db.cjs');
+require('esbuild').buildSync({entryPoints:['tests/helpers/tenant-db.ts'],outfile:helper,bundle:true,platform:'node',format:'cjs',packages:'external',logLevel:'silent'});
+const {tenantDatabase,actors,identity,value,company}=require(helper);
+const ORIGIN=`http://127.0.0.1:${servicePort}`,APP=process.env.E2E_APP_ORIGIN||'http://127.0.0.1:3200',jwtSecret='offline-fixture-signing-key',control='offline-fixture-control';
 const transactions=new Map();let providerId=99000;
 const json=(res,status,data,headers={})=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':APP,'Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info,x-fixture-control',...headers});res.end(JSON.stringify(data,(_k,v)=>typeof v==='bigint'?Number(v):v));};
 const b64=v=>Buffer.from(JSON.stringify(v)).toString('base64url');
@@ -65,7 +69,7 @@ async function main(){
   }
   return json(res,404,{message:'Offline fixture route unavailable'});
  }catch(e){return json(res,e.message==='Forbidden'||e.code==='42501'?403:400,{message:e.message,code:e.code||'fixture',details:null,hint:null});}});
- server.listen(54329,'127.0.0.1',()=>{fs.writeFileSync('.data/offline/tenant-fixture.json',JSON.stringify(fixture,null,2));console.log('Offline identity, payment and PostgreSQL fixtures ready on loopback. No external services connected.');});
+ server.listen(servicePort,'127.0.0.1',()=>{fs.writeFileSync(path.join(fixtureRoot,'tenant-fixture.json'),JSON.stringify(fixture,null,2));console.log('Offline identity, payment and PostgreSQL fixtures ready on loopback. No external services connected.');});
  const stop=()=>server.close(async()=>{await db.close();process.exit();});process.on('SIGTERM',stop);process.on('SIGINT',stop);
 }
 main().catch(e=>{console.error('Offline fixture failed:',e.message);process.exitCode=1;});

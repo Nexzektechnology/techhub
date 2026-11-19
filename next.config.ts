@@ -5,6 +5,7 @@ const config: NextConfig = {
   // Preserve the rewrite origin and routing headers across tenant-host navigation.
   skipProxyUrlNormalize: process.env.SAAS_DOMAIN_ROUTING === 'true',
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  ...(process.env.E2E_OFFLINE==='true'&&process.env.NODE_ENV!=='production'?{allowedDevOrigins:['tenant-a.nexzekbizhub.test','tenant-b.nexzekbizhub.test','wenlas.example.test']}:{}),
   serverExternalPackages: ['node:sqlite'],
   // Shared build hosts can report more CPUs than their process/thread quota.
   experimental: { cpus: 2 },

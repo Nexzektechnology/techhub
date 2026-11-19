@@ -12,6 +12,7 @@ it('installs all migrations with exact checksums and refuses replay without chan
   const files=readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).sort();expect(ledger.rows.map(r=>r.name)).toEqual(files);
   for(const row of ledger.rows)expect(row.checksum).toBe(createHash('sha256').update(readFileSync('supabase/migrations/'+row.name)).digest('hex'));
   expect((await db.query("select relrowsecurity from pg_class where oid='saas_subdomains'::regclass")).rows).toEqual([{relrowsecurity:true}]);
+  expect((await db.query("select is_updatable from information_schema.views where table_schema='public' and table_name='storefront_products'")).rows).toEqual([{is_updatable:'NO'}]);
   await expect(db.exec(sql)).rejects.toThrow('First install refused');await db.exec('rollback');expect((await db.query('select count(*)::int n from edge_deploy.migrations')).rows).toEqual([{n:files.length}]);
  }finally{await db.close();}
 });

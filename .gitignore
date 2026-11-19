@@ -37,6 +37,7 @@ yarn-error.log*
 .env*
 !.env.example
 /.data/
+/supabase/.temp/
 /test-results/
 /playwright-report/
 /artifacts/

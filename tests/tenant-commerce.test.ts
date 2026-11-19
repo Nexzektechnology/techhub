@@ -75,6 +75,7 @@ it('keeps payment application service-only and releases expired reservations wit
  await expect(identity(db,actors.a,()=>db.query("select tenant_apply_payment($1,$2,'NGN','success','9912')",[o.reference,o.total_kobo]))).rejects.toThrow('permission denied');
  await db.query("update orders set expires_at=now()-interval '1 minute' where id=$1",[o.id]);await identity(db,'',()=>db.query('select tenant_expire_pending()'),'service_role');
  expect(await value<string>(db,'select status v from orders where id=$1',[o.id])).toBe('expired');
+ expect(await value<string>(db,"select movement_kind v from stock_movements where order_id=$1 and reason='Reservation expired'",[o.id])).toBe('reservation_release');
  await expect(identity(db,'',()=>db.query("select tenant_apply_payment($1,$2,'NGN','success','9912')",[o.reference,o.total_kobo]),'service_role')).rejects.toThrow('reconciliation');
 });
 it('keeps unbranded products in restored bags and ignores archived flagship directory names',async()=>{

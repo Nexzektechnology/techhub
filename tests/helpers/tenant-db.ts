@@ -3,9 +3,9 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {companyTheme} from '../../src/lib/saas-contract';
 export const FLAGSHIP='10000000-0000-4000-8000-000000000001';
 export const actors={root:'61000000-0000-4000-8000-000000000001',a:'61000000-0000-4000-8000-000000000002',b:'61000000-0000-4000-8000-000000000003',staff:'61000000-0000-4000-8000-000000000004',customer:'61000000-0000-4000-8000-000000000005'};
-export async function tenantDatabase(){
+export async function tenantDatabase(through=Number.POSITIVE_INFINITY){
  const db=new PGlite();await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create table auth.users(id uuid primary key,email text unique,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;grant usage on schema auth to anon,authenticated,service_role;grant execute on function auth.uid() to anon,authenticated,service_role;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid,bucket_id text,name text);alter table storage.objects enable row level security;`);
- for(const file of readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')).sort())await db.exec(readFileSync(`supabase/migrations/${file}`,'utf8'));
+ for(const file of readdirSync('supabase/migrations').filter(f=>f.endsWith('.sql')&&Number.parseInt(f,10)<=through).sort()){try{await db.exec(readFileSync(`supabase/migrations/${file}`,'utf8'));}catch(error){if(error instanceof Error)error.message=`${file}: ${error.message}`;throw error;}}
  for(const [key,id] of Object.entries(actors))await db.query('insert into auth.users values($1,$2,now())',[id,`${key}@tenant.example`]);
  await db.query('insert into platform_admins(user_id) values($1)',[actors.root]);
  return db;

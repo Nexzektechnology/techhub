@@ -4,6 +4,24 @@
 -- PostgreSQL's constant defaults preserve old INSERT signatures and existing IDs.
 set local lock_timeout='5s';
 set local statement_timeout='120s';
+
+-- The timed-deal view used products' composite row type. PostgreSQL refuses
+-- adding columns while a view depends on that whole row type. Keep the view's
+-- existing interface, owner, grants and security-invoker mode, and express each
+-- output column directly before adding the tenant key. No DROP/CASCADE is used.
+do $$ declare projection text;begin
+ select string_agg(case a.attname
+  when 'price_kobo' then 'coalesce(public.effective_product_price(p.id),p.price_kobo)'
+  when 'previous_price_kobo' then 'case when public.effective_product_price(p.id)<p.price_kobo then p.price_kobo else p.previous_price_kobo end'
+  when 'regular_price_kobo' then 'p.price_kobo'
+  else format('p.%I',a.attname)
+ end||format(' as %I',a.attname),',' order by a.attnum) into projection
+ from pg_attribute a where a.attrelid='public.storefront_products'::regclass and a.attnum>0 and not a.attisdropped;
+ if projection is null then raise exception 'Storefront view unavailable; no ownership changes applied';end if;
+ -- A non-materialized CTE preserves the original view's read-only contract
+ -- while allowing predicate pushdown into the explicit product projection.
+ execute 'create or replace view public.storefront_products with(security_invoker=true) as with storefront_projection as not materialized (select '||projection||' from public.products p) select * from storefront_projection';
+end $$;
 do $$
 declare
  owned text[]:=array[
@@ -28,7 +46,7 @@ begin
   execute format('create policy legacy_company_boundary on public.%I as restrictive for all using(company_id=%L::uuid) with check(company_id=%L::uuid)',t,'10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001');
  end loop;
  -- Retain original foreign keys. Add company-aware keys without changing IDs,
- -- cascade semantics, unique slugs, grants, SECURITY DEFINER functions or views.
+ -- cascade semantics, unique slugs, grants, SECURITY DEFINER functions or view interfaces.
  for r in
   select c.*,ch.relname child_name,pa.relname parent_name
   from pg_constraint c join pg_class ch on ch.oid=c.conrelid join pg_class pa on pa.oid=c.confrelid
